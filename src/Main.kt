@@ -14,6 +14,7 @@
 
 
 import com.formdev.flatlaf.FlatDarkLaf
+import jdk.jfr.Description
 import java.awt.*
 import java.awt.event.*
 import javax.swing.*
@@ -48,6 +49,10 @@ class App() {
     }
 }
 
+class Scene(val name: String, val description: String, val colour: Color, ) {
+
+}
+
 
 /**
  * Main UI window (view)
@@ -58,7 +63,10 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
 
     // Fields to hold the UI elements
     private lateinit var clicksLabel: JLabel
-    private lateinit var clickButton: JButton
+    private lateinit var northButton: JButton
+    private lateinit var eastButton: JButton
+    private lateinit var southButton: JButton
+    private lateinit var westButton: JButton
 
     /**
      * Configure the UI and display it
@@ -78,7 +86,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      */
     private fun configureWindow() {
         title = "Kotlin Swing GUI Demo"
-        contentPane.preferredSize = Dimension(600, 350)
+        contentPane.preferredSize = Dimension(1200, 700)
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         isResizable = false
         layout = null
@@ -92,17 +100,38 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     private fun addControls() {
         val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 36)
 
+        val BUTTONS_X = 100
+        val BUTTONS_Y = 100
+
         clicksLabel = JLabel("CLICK INFO HERE")
         clicksLabel.horizontalAlignment = SwingConstants.CENTER
         clicksLabel.bounds = Rectangle(50, 50, 500, 100)
         clicksLabel.font = baseFont
         add(clicksLabel)
 
-        clickButton = JButton("Click Me!")
-        clickButton.bounds = Rectangle(50,200,500,100)
-        clickButton.font = baseFont
-        clickButton.addActionListener(this)     // Handle any clicks
-        add(clickButton)
+        northButton = JButton("N")
+        northButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y,50,50)
+        northButton.font = baseFont
+        northButton.addActionListener(this)     // Handle any clicks
+        add(northButton)
+
+        eastButton = JButton("E")
+        eastButton.bounds = Rectangle(BUTTONS_X + 50, BUTTONS_Y + 50,50,50)
+        eastButton.font = baseFont
+        eastButton.addActionListener(this)     // Handle any clicks
+        add(eastButton)
+
+        southButton = JButton("S")
+        southButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y + 100,50,50)
+        southButton.font = baseFont
+        southButton.addActionListener(this)     // Handle any clicks
+        add(southButton)
+
+        westButton = JButton("W")
+        westButton.bounds = Rectangle(BUTTONS_X - 50, BUTTONS_Y + 50,50,50)
+        westButton.font = baseFont
+        westButton.addActionListener(this)     // Handle any clicks
+        add(westButton)
     }
 
 
@@ -111,14 +140,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      * of the application model
      */
     fun updateView() {
-        if (app.clicks == app.MAX_CLICKS) {
-            clicksLabel.text = "Max clicks reached!"
-            clickButton.isEnabled = false
-        }
-        else {
-            clicksLabel.text = "You clicked ${app.clicks} times"
-            clickButton.isEnabled = true
-        }
+        clicksLabel.text = "Button Press"
     }
 
     /**
@@ -128,7 +150,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      */
     override fun actionPerformed(e: ActionEvent?) {
         when (e?.source) {
-            clickButton -> {
+            northButton -> {
                 app.updateClickCount()
                 updateView()
             }
