@@ -14,8 +14,6 @@
 
 
 import com.formdev.flatlaf.FlatDarkLaf
-import com.formdev.flatlaf.json.Location
-import jdk.jfr.Description
 import java.awt.*
 import java.awt.event.*
 import javax.swing.*
@@ -44,6 +42,7 @@ class App() {
             'e' -> currentLocation = currentLocation?.adjacentScene('e')
             's' -> currentLocation = currentLocation?.adjacentScene('s')
             'w' -> currentLocation = currentLocation?.adjacentScene('w')
+            'v' -> currentLocation = currentLocation?.adjacentScene('v')
         }
     }
 }
@@ -62,7 +61,8 @@ val hallway114 = Hallway(Triple(1,1,4))
 val hallway115 = Hallway(Triple(1,1,5))
 val hallway215 = Hallway(Triple(2,1,5))
 val weaponsRoom = Scene(Triple(3,1,2), "Weapons Room", "A open room, shelves lines with weapons")
-val elevator = Scene(Triple(3,1,5), "Elevator", "An untrustworthy elevator")
+val elevator1 = Scene(Triple(3,1,5), "Elevator", "An untrustworthy elevator at the top")
+val elevator2 = Scene(Triple(3,2,5), "Elevator", "An untrustworthy elevator at the bottom")
 val messHall = Scene(Triple(4,1,4), "Mess Hall", "An untidy mess hall, with flickering lights")
 val computerRoom = Scene(Triple(5,1,3), "Computer Room", "A computer room with seemingly outdated technology")
 val serverRoom = Scene(Triple(5,1,2), "Server Room", "A server room, fans spinning and lights blinking")
@@ -70,14 +70,15 @@ val serverRoom = Scene(Triple(5,1,2), "Server Room", "A server room, fans spinni
 
 open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = null, val description: String? = null) {
     var verticalConnection = 'n'
-
-    fun addToMap() {
-        gameMap[location] = this
+    fun enableVerticalConnection(direction: Char) {
+        if (direction == 'u' || direction == 'd') {
+            verticalConnection = direction
+        }
     }
 
-    fun enableVerticalConnection(direction: Char) {
-
-        }
+    var unlocked = true
+    fun lockRoom() {
+        unlocked = false
     }
 
     fun adjacentScene(direction: Char): Scene? {
@@ -86,15 +87,39 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
             'e' -> gameMap[Triple(location.first + 1, location.second, location.third)]
             's' -> gameMap[Triple(location.first, location.second, location.third + 1)]
             'w' -> gameMap[Triple(location.first - 1, location.second, location.third)]
+            'v' -> {
+                when (verticalConnection) {
+                    'u' -> gameMap[Triple(location.first, location.second - 1, location.third)]
+                    else -> gameMap[Triple(location.first, location.second + 1, location.third)]
+                }
+            }
             else -> null
         }
+    }
+
+    fun unlockAdjacentRooms() {
+        charArrayOf('n', 'e', 's', 'w').forEach { direction -> // Iterate through, unlocking each adjacent room
+            if (adjacentScene(direction) != null) {
+                adjacentScene(direction)!!.unlocked = true
+            }
+        }
+    }
+
+    fun addToMap() {
+        gameMap[location] = this
+    }
+    fun addToMapLocked() {
+        gameMap[location] = this
+        lockRoom()
     }
 }
 
 class Hallway(override val location: Triple<Int, Int, Int>) : Scene(Triple(0,0,0), "Hallway", "A dimly lit corridor") {}
 
-//class Hallway : Scene("Hallway", Triple(1,1,1), "A dimly lit hallway") {
-//} Need some better system for attributes
+class Object(val name: String val position: Scene) {
+
+}
+
 
 fun main() {
     FlatDarkLaf.setup()     // Flat, dark look-and-feel
@@ -105,18 +130,21 @@ fun main() {
     entrance.addToMap()
     hallway112.addToMap()
     blastDoor.addToMap()
-    hallway213.addToMap()
+    hallway213.addToMapLocked()
     hallway313.addToMap()
     hallway413.addToMap()
-    hallway114.addToMap()
+    hallway114.addToMapLocked()
     hallway115.addToMap()
     hallway215.addToMap()
-    weaponsRoom.addToMap()
-    elevator.addToMap()
-    elevator.enableVerticalConnection()
+    weaponsRoom.addToMapLocked()
+    elevator1.addToMap()
+    elevator1.enableVerticalConnection('d')
     messHall.addToMap()
     computerRoom.addToMap()
     serverRoom.addToMap()
+
+    elevator2.addToMap()
+    elevator2.enableVerticalConnection('u')
 
 
 }
@@ -135,7 +163,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     private lateinit var southButton: JButton
     private lateinit var westButton: JButton
     private lateinit var verticalButton: JButton
-    private lateinit var startButton: JButton
+    private lateinit var unlockButton: JButton
     private lateinit var descriptionLabel: JLabel
 
     /**
@@ -148,7 +176,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         setLocationRelativeTo(null)     // Centre the window
         isVisible = true                // Make it visible
 
-        updateView()                    // Initialise the UI
+        updateView()                   // Initialise the UI
     }
 
     /**
@@ -216,11 +244,11 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         verticalButton.addActionListener(this)     // Handle any clicks
         add(verticalButton)
 
-        startButton = JButton("Start")
-        startButton.bounds = Rectangle(BUTTONS_X + 100, BUTTONS_Y + 50,50,50)
-        startButton.font = baseFont
-        startButton.addActionListener(this)     // Handle any clicks
-        add(startButton)
+        unlockButton = JButton("Unlock")
+        unlockButton.bounds = Rectangle(BUTTONS_X - 50, BUTTONS_Y + 200,150,50)
+        unlockButton.font = baseFont
+        unlockButton.addActionListener(this)     // Handle any clicks
+        add(unlockButton)
     }
 
 
@@ -232,11 +260,47 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     fun updateView() {
         clicksLabel.text = app.currentLocation?.name
         descriptionLabel.text = app.currentLocation?.description
-        northButton.isEnabled = app.currentLocation?.adjacentScene('n') != null
-        eastButton.isEnabled = app.currentLocation?.adjacentScene('e') != null
-        southButton.isEnabled = app.currentLocation?.adjacentScene('s') != null
-        westButton.isEnabled = app.currentLocation?.adjacentScene('w') != null
-        verticalButton.isEnabled = app.currentLocation?.hasVerticalConnection ?: false
+
+        if (app.currentLocation?.adjacentScene('n') != null) {
+            northButton.text = "↑"
+        } else {
+            northButton.text = ""
+        }
+        if (app.currentLocation?.adjacentScene('s') != null) {
+            southButton.text = "↓"
+        } else {
+            southButton.text = ""
+        }
+        if (app.currentLocation?.adjacentScene('e') != null) {
+            eastButton.text = "→"
+        } else {
+            eastButton.text = ""
+        }
+        if (app.currentLocation?.adjacentScene('w') != null) {
+            westButton.text = "←"
+        } else {
+            westButton.text = ""
+        }
+
+        northButton.isEnabled = app.currentLocation?.adjacentScene('n')?.unlocked ?: false
+        eastButton.isEnabled = app.currentLocation?.adjacentScene('e')?.unlocked ?: false
+        southButton.isEnabled = app.currentLocation?.adjacentScene('s')?.unlocked ?: false
+        westButton.isEnabled = app.currentLocation?.adjacentScene('w')?.unlocked ?: false
+
+        when (app.currentLocation?.verticalConnection) {
+            'u' -> {
+                verticalButton.text = "^"
+                verticalButton.isEnabled = true
+            }
+            'd' -> {
+                verticalButton.text = "v"
+                verticalButton.isEnabled = true
+            }
+            else -> {
+                verticalButton.text = "-"
+                verticalButton.isEnabled = false
+            }
+        }
     }
 
     /**
@@ -246,26 +310,14 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      */
     override fun actionPerformed(e: ActionEvent?) {
         when (e?.source) {
-            northButton -> {
-                app.move('n')
-                updateView()
-            }
-            eastButton -> {
-                app.move('e')
-                updateView()
-            }
-            southButton -> {
-                app.move('s')
-                updateView()
-            }
-            westButton -> {
-                app.move('w')
-                updateView()
-            }
-            startButton -> {
-                updateView()
-            }
+            northButton -> app.move('n')
+            eastButton -> app.move('e')
+            southButton -> app.move('s')
+            westButton -> app.move('w')
+            unlockButton -> app.currentLocation?.unlockAdjacentRooms()
+            verticalButton -> app.move('v')
         }
+        updateView()
     }
 
 }
