@@ -14,6 +14,7 @@
 
 
 import com.formdev.flatlaf.FlatDarkLaf
+import com.formdev.flatlaf.json.Location
 import jdk.jfr.Description
 import java.awt.*
 import java.awt.event.*
@@ -23,11 +24,6 @@ import javax.swing.*
 /**
  * Launch the application
  */
-fun main() {
-    FlatDarkLaf.setup()     // Flat, dark look-and-feel
-    val app = App()         // Create the app model
-    MainWindow(app)         // Create and show the UI, using the app model
-}
 
 
 /**
@@ -37,22 +33,68 @@ fun main() {
  */
 class App() {
     // Constants defining any key values
-    val MAX_CLICKS = 10
 
     // Data fields
-    var clicks = 0
+    var currentLocation: Scene? = entrance
 
     // Application logic functions
-    fun updateClickCount() {
-        clicks++
-        if (clicks > MAX_CLICKS) clicks = MAX_CLICKS
+    fun move(dir: Char) {
+        when (dir) {
+            'n' -> currentLocation = currentLocation?.adjacentScene('n') // Nullable as buttons disabled
+            'e' -> currentLocation = currentLocation?.adjacentScene('e')
+            's' -> currentLocation = currentLocation?.adjacentScene('s')
+            'w' -> currentLocation = currentLocation?.adjacentScene('w')
+        }
     }
 }
 
-class Scene(val name: String, val description: String, val colour: Color, ) {
 
+val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>()
+
+// Define the map
+val entrance = Scene( Triple(1,1,1), "Entrance", "The entrance to the facility")
+val hallway112 = Hallway(Triple(1,1,2))
+val blastDoor = Scene(Triple(1,1,3), "Blast Door", "A reinforced blast door")
+val hallway213 = Hallway(Triple(2,1,3))
+val hallway313 = Hallway(Triple(3,1,3))
+val hallway413 = Hallway(Triple(4,1,3))
+
+
+open class Scene(open val location: Triple<Int, Int, Int>, val name: String?, val description: String?) {
+    fun addToMap() {
+        gameMap[location] = this
+    }
+    fun adjacentScene(dir: Char): Scene? {
+        return when (dir) {
+            'n' -> gameMap[Triple(location.first, location.second, location.third - 1)]
+            'e' -> gameMap[Triple(location.first + 1, location.second, location.third)]
+            's' -> gameMap[Triple(location.first, location.second, location.third + 1)]
+            'w' -> gameMap[Triple(location.first - 1, location.second, location.third)]
+            else -> null
+        }
+    }
 }
 
+class Hallway(override val location: Triple<Int, Int, Int>) : Scene(Triple(0,0,0), "Hallway", "A dimly lit corridor") {}
+
+//class Hallway : Scene("Hallway", Triple(1,1,1), "A dimly lit hallway") {
+//} Need some better system for attributes
+
+fun main() {
+    FlatDarkLaf.setup()     // Flat, dark look-and-feel
+    val app = App()         // Create the app model
+    MainWindow(app)         // Create and show the UI, using the app model
+
+    // Add scenes
+    entrance.addToMap()
+    hallway112.addToMap()
+    blastDoor.addToMap()
+    hallway213.addToMap()
+    hallway313.addToMap()
+    hallway413.addToMap()
+
+
+}
 
 /**
  * Main UI window (view)
@@ -67,6 +109,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     private lateinit var eastButton: JButton
     private lateinit var southButton: JButton
     private lateinit var westButton: JButton
+    private lateinit var startButton: JButton
 
     /**
      * Configure the UI and display it
@@ -132,7 +175,14 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         westButton.font = baseFont
         westButton.addActionListener(this)     // Handle any clicks
         add(westButton)
+
+        startButton = JButton("Start")
+        startButton.bounds = Rectangle(BUTTONS_X + 100, BUTTONS_Y + 50,50,50)
+        startButton.font = baseFont
+        startButton.addActionListener(this)     // Handle any clicks
+        add(startButton)
     }
+
 
 
     /**
@@ -140,7 +190,12 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      * of the application model
      */
     fun updateView() {
-        clicksLabel.text = "Button Press"
+
+        clicksLabel.text = app.currentLocation?.name
+        northButton.isEnabled = app.currentLocation?.adjacentScene('n') != null
+        eastButton.isEnabled = app.currentLocation?.adjacentScene('e') != null
+        southButton.isEnabled = app.currentLocation?.adjacentScene('s') != null
+        westButton.isEnabled = app.currentLocation?.adjacentScene('w') != null
     }
 
     /**
@@ -151,7 +206,22 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     override fun actionPerformed(e: ActionEvent?) {
         when (e?.source) {
             northButton -> {
-                app.updateClickCount()
+                app.move('n')
+                updateView()
+            }
+            eastButton -> {
+                app.move('e')
+                updateView()
+            }
+            southButton -> {
+                app.move('s')
+                updateView()
+            }
+            westButton -> {
+                app.move('w')
+                updateView()
+            }
+            startButton -> {
                 updateView()
             }
         }
