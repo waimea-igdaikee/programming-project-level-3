@@ -58,14 +58,30 @@ val blastDoor = Scene(Triple(1,1,3), "Blast Door", "A reinforced blast door")
 val hallway213 = Hallway(Triple(2,1,3))
 val hallway313 = Hallway(Triple(3,1,3))
 val hallway413 = Hallway(Triple(4,1,3))
+val hallway114 = Hallway(Triple(1,1,4))
+val hallway115 = Hallway(Triple(1,1,5))
+val hallway215 = Hallway(Triple(2,1,5))
+val weaponsRoom = Scene(Triple(3,1,2), "Weapons Room", "A open room, shelves lines with weapons")
+val elevator = Scene(Triple(3,1,5), "Elevator", "An untrustworthy elevator")
+val messHall = Scene(Triple(4,1,4), "Mess Hall", "An untidy mess hall, with flickering lights")
+val computerRoom = Scene(Triple(5,1,3), "Computer Room", "A computer room with seemingly outdated technology")
+val serverRoom = Scene(Triple(5,1,2), "Server Room", "A server room, fans spinning and lights blinking")
 
 
-open class Scene(open val location: Triple<Int, Int, Int>, val name: String?, val description: String?) {
+open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = null, val description: String? = null) {
+    var verticalConnection = 'n'
+
     fun addToMap() {
         gameMap[location] = this
     }
-    fun adjacentScene(dir: Char): Scene? {
-        return when (dir) {
+
+    fun enableVerticalConnection(direction: Char) {
+
+        }
+    }
+
+    fun adjacentScene(direction: Char): Scene? {
+        return when (direction) {
             'n' -> gameMap[Triple(location.first, location.second, location.third - 1)]
             'e' -> gameMap[Triple(location.first + 1, location.second, location.third)]
             's' -> gameMap[Triple(location.first, location.second, location.third + 1)]
@@ -92,6 +108,15 @@ fun main() {
     hallway213.addToMap()
     hallway313.addToMap()
     hallway413.addToMap()
+    hallway114.addToMap()
+    hallway115.addToMap()
+    hallway215.addToMap()
+    weaponsRoom.addToMap()
+    elevator.addToMap()
+    elevator.enableVerticalConnection()
+    messHall.addToMap()
+    computerRoom.addToMap()
+    serverRoom.addToMap()
 
 
 }
@@ -109,7 +134,9 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     private lateinit var eastButton: JButton
     private lateinit var southButton: JButton
     private lateinit var westButton: JButton
+    private lateinit var verticalButton: JButton
     private lateinit var startButton: JButton
+    private lateinit var descriptionLabel: JLabel
 
     /**
      * Configure the UI and display it
@@ -129,7 +156,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      */
     private fun configureWindow() {
         title = "Kotlin Swing GUI Demo"
-        contentPane.preferredSize = Dimension(1200, 700)
+        contentPane.preferredSize = Dimension(1000, 500)
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         isResizable = false
         layout = null
@@ -142,6 +169,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      */
     private fun addControls() {
         val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 36)
+        val smallFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
 
         val BUTTONS_X = 100
         val BUTTONS_Y = 100
@@ -151,6 +179,12 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         clicksLabel.bounds = Rectangle(50, 50, 500, 100)
         clicksLabel.font = baseFont
         add(clicksLabel)
+
+        descriptionLabel = JLabel("DESCRIPTION HERE")
+        descriptionLabel.horizontalAlignment = SwingConstants.CENTER
+        descriptionLabel.bounds = Rectangle(100, 150, 500, 100)
+        descriptionLabel.font = smallFont
+        add(descriptionLabel)
 
         northButton = JButton("N")
         northButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y,50,50)
@@ -176,6 +210,12 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         westButton.addActionListener(this)     // Handle any clicks
         add(westButton)
 
+        verticalButton = JButton("-")
+        verticalButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y + 50,50,50)
+        verticalButton.font = baseFont
+        verticalButton.addActionListener(this)     // Handle any clicks
+        add(verticalButton)
+
         startButton = JButton("Start")
         startButton.bounds = Rectangle(BUTTONS_X + 100, BUTTONS_Y + 50,50,50)
         startButton.font = baseFont
@@ -190,12 +230,13 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      * of the application model
      */
     fun updateView() {
-
         clicksLabel.text = app.currentLocation?.name
+        descriptionLabel.text = app.currentLocation?.description
         northButton.isEnabled = app.currentLocation?.adjacentScene('n') != null
         eastButton.isEnabled = app.currentLocation?.adjacentScene('e') != null
         southButton.isEnabled = app.currentLocation?.adjacentScene('s') != null
         westButton.isEnabled = app.currentLocation?.adjacentScene('w') != null
+        verticalButton.isEnabled = app.currentLocation?.hasVerticalConnection ?: false
     }
 
     /**
