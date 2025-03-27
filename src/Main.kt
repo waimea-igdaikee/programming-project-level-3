@@ -116,7 +116,7 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
 
 class Hallway(override val location: Triple<Int, Int, Int>) : Scene(Triple(0,0,0), "Hallway", "A dimly lit corridor") {}
 
-class Object(val name: String val position: Scene) {
+class Object(val name: String, val position: Scene) {
 
 }
 
