@@ -49,6 +49,7 @@ class App() {
 
 
 val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>()
+val inventory = mutableListOf<Item>()
 
 // Define the map
 val entrance = Scene( Triple(1,1,1), "Entrance", "The entrance to the facility")
@@ -70,15 +71,26 @@ val serverRoom = Scene(Triple(5,1,2), "Server Room", "A server room, fans spinni
 
 open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = null, val description: String? = null) {
     var verticalConnection = 'n'
+    var unlocked = true
+    val items = mutableListOf<Item>()
     fun enableVerticalConnection(direction: Char) {
         if (direction == 'u' || direction == 'd') {
             verticalConnection = direction
         }
     }
 
-    var unlocked = true
     fun lockRoom() {
         unlocked = false
+    }
+
+    fun addItem(obj: Item) {
+        items.add(obj)
+    }
+
+    fun printItems(): String? {
+        var itemString: String = ""
+        for (item in items) {itemString += item.name + "\n"}
+        return itemString
     }
 
     fun adjacentScene(direction: Char): Scene? {
@@ -118,7 +130,14 @@ class Hallway(override val location: Triple<Int, Int, Int>) : Scene(Triple(0,0,0
 
 class Object(val name: String, val position: Scene) {
 
+class Item(val name: String, val spawnLocations: Array<Scene>) {
+    fun spawn() {
+        spawnLocations[spawnLocations.indices.random()].addItem(this) // Random location in list
+    }
 }
+
+// Initialise items
+val weaponRoomKey = Item("Blue Keycard", arrayOf(messHall, serverRoom))
 
 
 fun main() {
@@ -146,6 +165,8 @@ fun main() {
     elevator2.addToMap()
     elevator2.enableVerticalConnection('u')
 
+    // Initialise Items
+    weaponRoomKey.spawn()
 
 }
 
@@ -165,6 +186,17 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     private lateinit var verticalButton: JButton
     private lateinit var unlockButton: JButton
     private lateinit var descriptionLabel: JLabel
+    private lateinit var itemListLabel: JLabel
+    private lateinit var itemsLabel: JLabel
+    private lateinit var inventoryLabel: JLabel
+    private lateinit var inventoryButton1 : JButton
+    private lateinit var inventoryButton2 : JButton
+    private lateinit var inventoryButton3 : JButton
+    private lateinit var inventoryButton4 : JButton
+    private lateinit var inventoryButton5 : JButton
+    private lateinit var inventoryButton6 : JButton
+    private lateinit var inventoryButton7 : JButton
+    private lateinit var inventoryButton8 : JButton
 
     /**
      * Configure the UI and display it
@@ -185,7 +217,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     private fun configureWindow() {
         title = "Kotlin Swing GUI Demo"
         contentPane.preferredSize = Dimension(1000, 500)
-        defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
+        defaultCloseOperation = EXIT_ON_CLOSE
         isResizable = false
         layout = null
 
@@ -213,6 +245,12 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         descriptionLabel.bounds = Rectangle(100, 150, 500, 100)
         descriptionLabel.font = smallFont
         add(descriptionLabel)
+
+        itemListLabel = JLabel("ITEM LIST")
+        itemListLabel.horizontalAlignment = SwingConstants.CENTER
+        itemListLabel.bounds = Rectangle(300, 150, 500, 300)
+        itemListLabel.font = smallFont
+        add(itemListLabel)
 
         northButton = JButton("N")
         northButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y,50,50)
@@ -249,7 +287,58 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         unlockButton.font = baseFont
         unlockButton.addActionListener(this)     // Handle any clicks
         add(unlockButton)
+
+        itemsLabel = JLabel("Items")
+        itemsLabel.horizontalAlignment = SwingConstants.CENTER
+        itemsLabel.bounds = Rectangle(400, 20, 200, 100)
+        itemsLabel.font = baseFont
+        add(itemsLabel)
+
+        inventoryLabel = JLabel("Inventory")
+        inventoryLabel.horizontalAlignment = SwingConstants.CENTER
+        inventoryLabel.bounds = Rectangle(700, 20, 200, 100)
+        inventoryLabel.font = baseFont
+        add(inventoryLabel)
+
+        val INVENTORY_X = 500
+        val INVENTORY_Y = 100
+        val INVENTORY_HEIGHT = 30
+        val INVENTORY_WIDTH = 150
+        val INVENTORY_SPACING = 10
+
+        inventoryButton1 = JButton("")
+        inventoryButton1.bounds = Rectangle(INVENTORY_X, INVENTORY_Y, INVENTORY_WIDTH, INVENTORY_HEIGHT)
+        inventoryButton1.font = smallFont
+        inventoryButton1.addActionListener(this)
+        add(inventoryButton1)
+
+        inventoryButton2 = JButton("")
+        inventoryButton2.bounds = Rectangle(INVENTORY_X, INVENTORY_Y + (INVENTORY_HEIGHT + INVENTORY_SPACING) * 1, INVENTORY_WIDTH, INVENTORY_HEIGHT)
+        inventoryButton2.font = smallFont
+        inventoryButton2.addActionListener(this)
+        add(inventoryButton2)
+
+        inventoryButton3 = JButton("")
+        inventoryButton3.bounds = Rectangle(INVENTORY_X, INVENTORY_Y + (INVENTORY_HEIGHT + INVENTORY_SPACING) * 2, INVENTORY_WIDTH, INVENTORY_HEIGHT)
+        inventoryButton3.font = smallFont
+        inventoryButton3.addActionListener(this)
+        add(inventoryButton3)
+
+        inventoryButton4 = JButton("")
+        inventoryButton4.bounds = Rectangle(INVENTORY_X, INVENTORY_Y + (INVENTORY_HEIGHT + INVENTORY_SPACING) * 3, INVENTORY_WIDTH, INVENTORY_HEIGHT)
+        inventoryButton4.font = smallFont
+        inventoryButton4.addActionListener(this)
+        add(inventoryButton4)
+
+        inventoryButton5 = JButton("")
+        inventoryButton5.bounds = Rectangle(INVENTORY_X, INVENTORY_Y + (INVENTORY_HEIGHT + INVENTORY_SPACING) * 4, INVENTORY_WIDTH, INVENTORY_HEIGHT)
+        inventoryButton5.font = smallFont
+        inventoryButton5.addActionListener(this)
+        add(inventoryButton5)
     }
+
+
+
 
 
 
@@ -260,6 +349,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     fun updateView() {
         clicksLabel.text = app.currentLocation?.name
         descriptionLabel.text = app.currentLocation?.description
+        itemListLabel.text = app.currentLocation?.printItems()
+        println(app.currentLocation?.printItems())
 
         if (app.currentLocation?.adjacentScene('n') != null) {
             northButton.text = "↑"
