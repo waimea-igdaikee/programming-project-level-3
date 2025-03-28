@@ -87,10 +87,11 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
         items.add(obj)
     }
 
-    fun printItems(): String? {
-        var itemString: String = ""
-        for (item in items) {itemString += item.name + "\n"}
-        return itemString
+    fun printItem(itemNumber: Int): String {
+        if (items.size >= itemNumber) {
+            return items[itemNumber - 1].name
+        }
+        else return ""
     }
 
     fun adjacentScene(direction: Char): Scene? {
@@ -128,13 +129,12 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
 
 class Hallway(override val location: Triple<Int, Int, Int>) : Scene(Triple(0,0,0), "Hallway", "A dimly lit corridor") {}
 
-class Object(val name: String, val position: Scene) {
-
 class Item(val name: String, val spawnLocations: Array<Scene>) {
     fun spawn() {
         spawnLocations[spawnLocations.indices.random()].addItem(this) // Random location in list
     }
 }
+
 
 // Initialise items
 val weaponRoomKey = Item("Blue Keycard", arrayOf(messHall, serverRoom))
@@ -161,7 +161,6 @@ fun main() {
     messHall.addToMap()
     computerRoom.addToMap()
     serverRoom.addToMap()
-
     elevator2.addToMap()
     elevator2.enableVerticalConnection('u')
 
@@ -186,17 +185,24 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     private lateinit var verticalButton: JButton
     private lateinit var unlockButton: JButton
     private lateinit var descriptionLabel: JLabel
-    private lateinit var itemListLabel: JLabel
     private lateinit var itemsLabel: JLabel
     private lateinit var inventoryLabel: JLabel
-    private lateinit var inventoryButton1 : JButton
-    private lateinit var inventoryButton2 : JButton
-    private lateinit var inventoryButton3 : JButton
-    private lateinit var inventoryButton4 : JButton
-    private lateinit var inventoryButton5 : JButton
-    private lateinit var inventoryButton6 : JButton
-    private lateinit var inventoryButton7 : JButton
-    private lateinit var inventoryButton8 : JButton
+    private lateinit var inventoryLabel1: JLabel
+    private lateinit var inventoryLabel2: JLabel
+    private lateinit var inventoryLabel3: JLabel
+    private lateinit var inventoryLabel4: JLabel
+    private lateinit var inventoryLabel5: JLabel
+    private lateinit var useButton1 : JButton
+    private lateinit var useButton2 : JButton
+    private lateinit var useButton3 : JButton
+    private lateinit var useButton4 : JButton
+    private lateinit var useButton5 : JButton
+
+    private lateinit var dropButton1 : JButton
+    private lateinit var dropButton2 : JButton
+    private lateinit var dropButton3 : JButton
+    private lateinit var dropButton4 : JButton
+    private lateinit var dropButton5 : JButton
 
     /**
      * Configure the UI and display it
@@ -246,12 +252,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         descriptionLabel.font = smallFont
         add(descriptionLabel)
 
-        itemListLabel = JLabel("ITEM LIST")
-        itemListLabel.horizontalAlignment = SwingConstants.CENTER
-        itemListLabel.bounds = Rectangle(300, 150, 500, 300)
-        itemListLabel.font = smallFont
-        add(itemListLabel)
-
         northButton = JButton("N")
         northButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y,50,50)
         northButton.font = baseFont
@@ -300,44 +300,79 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         inventoryLabel.font = baseFont
         add(inventoryLabel)
 
-        val INVENTORY_X = 500
+
+        val ITEMS_X = 500
+        val ITEMS_Y = 100
+        val ITEMS_BUTTON_SIZE = 30
+        val ITEMS_SPACING = 10
+
+        val INVENTORY_X = 600
         val INVENTORY_Y = 100
-        val INVENTORY_HEIGHT = 30
-        val INVENTORY_WIDTH = 150
+        val INVENTORY_BUTTON_SIZE = 30
         val INVENTORY_SPACING = 10
 
-        inventoryButton1 = JButton("")
-        inventoryButton1.bounds = Rectangle(INVENTORY_X, INVENTORY_Y, INVENTORY_WIDTH, INVENTORY_HEIGHT)
-        inventoryButton1.font = smallFont
-        inventoryButton1.addActionListener(this)
-        add(inventoryButton1)
+        inventoryLabel1 = JLabel("")
+        inventoryLabel2 = JLabel("")
+        inventoryLabel3 = JLabel("")
+        inventoryLabel4 = JLabel("")
+        inventoryLabel5 = JLabel("")
 
-        inventoryButton2 = JButton("")
-        inventoryButton2.bounds = Rectangle(INVENTORY_X, INVENTORY_Y + (INVENTORY_HEIGHT + INVENTORY_SPACING) * 1, INVENTORY_WIDTH, INVENTORY_HEIGHT)
-        inventoryButton2.font = smallFont
-        inventoryButton2.addActionListener(this)
-        add(inventoryButton2)
+        val inventoryLabels = arrayOf(inventoryLabel1, inventoryLabel2, inventoryLabel3, inventoryLabel4, inventoryLabel5)
 
-        inventoryButton3 = JButton("")
-        inventoryButton3.bounds = Rectangle(INVENTORY_X, INVENTORY_Y + (INVENTORY_HEIGHT + INVENTORY_SPACING) * 2, INVENTORY_WIDTH, INVENTORY_HEIGHT)
-        inventoryButton3.font = smallFont
-        inventoryButton3.addActionListener(this)
-        add(inventoryButton3)
+        inventoryLabels.forEachIndexed() {index, label ->
+            label.horizontalAlignment = SwingConstants.LEFT
+            label.bounds = Rectangle(
+                INVENTORY_X,
+                INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                100,
+                INVENTORY_BUTTON_SIZE)
+            label.font = smallFont
+            add(label)
+        }
 
-        inventoryButton4 = JButton("")
-        inventoryButton4.bounds = Rectangle(INVENTORY_X, INVENTORY_Y + (INVENTORY_HEIGHT + INVENTORY_SPACING) * 3, INVENTORY_WIDTH, INVENTORY_HEIGHT)
-        inventoryButton4.font = smallFont
-        inventoryButton4.addActionListener(this)
-        add(inventoryButton4)
 
-        inventoryButton5 = JButton("")
-        inventoryButton5.bounds = Rectangle(INVENTORY_X, INVENTORY_Y + (INVENTORY_HEIGHT + INVENTORY_SPACING) * 4, INVENTORY_WIDTH, INVENTORY_HEIGHT)
-        inventoryButton5.font = smallFont
-        inventoryButton5.addActionListener(this)
-        add(inventoryButton5)
+
+
+        useButton1 = JButton("")
+        useButton2 = JButton("")
+        useButton3 = JButton("")
+        useButton4 = JButton("")
+        useButton5 = JButton("")
+
+        val useButtons = arrayOf(useButton1, useButton2, useButton3, useButton4, useButton5)
+
+        useButtons.forEachIndexed() {index, button ->
+            button.bounds = Rectangle(
+                INVENTORY_X + 100,
+                INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                INVENTORY_BUTTON_SIZE,
+                INVENTORY_BUTTON_SIZE
+            )
+            button.font = smallFont
+            button.addActionListener(this)
+            add(button)
+        }
+
+        dropButton1 = JButton("")
+        dropButton2 = JButton("")
+        dropButton3 = JButton("")
+        dropButton4 = JButton("")
+        dropButton5 = JButton("")
+
+        val dropButtons = arrayOf(dropButton1, dropButton2, dropButton3, dropButton4, dropButton5)
+
+        dropButtons.forEachIndexed() {index, button ->
+            button.bounds = Rectangle(
+                INVENTORY_X + 150,
+                INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                INVENTORY_BUTTON_SIZE,
+                INVENTORY_BUTTON_SIZE
+            )
+            button.font = smallFont
+            button.addActionListener(this)
+            add(button)
+        }
     }
-
-
 
 
 
@@ -349,8 +384,12 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     fun updateView() {
         clicksLabel.text = app.currentLocation?.name
         descriptionLabel.text = app.currentLocation?.description
-        itemListLabel.text = app.currentLocation?.printItems()
-        println(app.currentLocation?.printItems())
+        // I should probably store all these in an array and then use .forEach()
+        inventoryLabel1.text = app.currentLocation?.printItem(1)
+        inventoryLabel2.text = app.currentLocation?.printItem(2)
+//        inventoryLabel3.text = app.currentLocation?.printItem(3)
+//        inventoryLabel4.text = app.currentLocation?.printItem(4)
+//        inventoryLabel5.text = app.currentLocation?.printItem(5)
 
         if (app.currentLocation?.adjacentScene('n') != null) {
             northButton.text = "↑"
@@ -412,4 +451,3 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     }
 
 }
-
