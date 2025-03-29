@@ -33,23 +33,53 @@ class App() {
     // Constants defining any key values
 
     // Data fields
-    var currentLocation: Scene? = entrance
+    var currentLocation: Scene = entrance
+    val inventory = mutableListOf<Item>()
 
     // Application logic functions
     fun move(dir: Char) {
         when (dir) {
-            'n' -> currentLocation = currentLocation?.adjacentScene('n') // Nullable as buttons disabled
-            'e' -> currentLocation = currentLocation?.adjacentScene('e')
-            's' -> currentLocation = currentLocation?.adjacentScene('s')
-            'w' -> currentLocation = currentLocation?.adjacentScene('w')
-            'v' -> currentLocation = currentLocation?.adjacentScene('v')
+            'n' -> currentLocation = currentLocation.adjacentScene('n')!! // Nullable as buttons disabled
+            'e' -> currentLocation = currentLocation.adjacentScene('e')!!
+            's' -> currentLocation = currentLocation.adjacentScene('s')!!
+            'w' -> currentLocation = currentLocation.adjacentScene('w')!!
+            'v' -> currentLocation = currentLocation.adjacentScene('v')!!
         }
+    }
+
+    fun getSceneItem(itemNumber: Int): Item? {
+        return if (currentLocation.items.size >= itemNumber) {
+            currentLocation.items[itemNumber - 1]
+        } else {
+            null
+        }
+    }
+
+    fun getInventoryItem(itemNumber: Int): Item? {
+        return if (inventory.size >= itemNumber) {
+            inventory[itemNumber - 1]
+        } else {
+            null
+        }
+    }
+
+    fun takeItem(itemNumber: Int) {
+        val item = getSceneItem(itemNumber)
+        if (item != null) {
+            inventory.add(item)
+            currentLocation!!.items.remove(item)
+        }
+    }
+
+    fun dropItem(itemNumber: Int) {
+        val item = getInventoryItem(itemNumber)
+            currentLocation!!.items.?add(item)
+            inventory.remove(item)
     }
 }
 
 
 val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>()
-val inventory = mutableListOf<Item>()
 
 // Define the map
 val entrance = Scene( Triple(1,1,1), "Entrance", "The entrance to the facility")
@@ -186,12 +216,27 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
     private lateinit var unlockButton: JButton
     private lateinit var descriptionLabel: JLabel
     private lateinit var itemsLabel: JLabel
+
+
+    private lateinit var itemLabel1: JLabel
+    private lateinit var itemLabel2: JLabel
+    private lateinit var itemLabel3: JLabel
+    private lateinit var itemLabel4: JLabel
+    private lateinit var itemLabel5: JLabel
+
     private lateinit var inventoryLabel: JLabel
     private lateinit var inventoryLabel1: JLabel
     private lateinit var inventoryLabel2: JLabel
     private lateinit var inventoryLabel3: JLabel
     private lateinit var inventoryLabel4: JLabel
     private lateinit var inventoryLabel5: JLabel
+
+    private lateinit var takeButton1 : JButton
+    private lateinit var takeButton2 : JButton
+    private lateinit var takeButton3 : JButton
+    private lateinit var takeButton4 : JButton
+    private lateinit var takeButton5 : JButton
+
     private lateinit var useButton1 : JButton
     private lateinit var useButton2 : JButton
     private lateinit var useButton3 : JButton
@@ -301,12 +346,12 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         add(inventoryLabel)
 
 
-        val ITEMS_X = 500
-        val ITEMS_Y = 100
-        val ITEMS_BUTTON_SIZE = 30
-        val ITEMS_SPACING = 10
+//        val ITEMS_X = 500
+//        val ITEMS_Y = 100
+//        val ITEMS_BUTTON_SIZE = 30
+//        val ITEMS_SPACING = 10
 
-        val INVENTORY_X = 600
+        val INVENTORY_X = 750
         val INVENTORY_Y = 100
         val INVENTORY_BUTTON_SIZE = 30
         val INVENTORY_SPACING = 10
@@ -328,6 +373,45 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
                 INVENTORY_BUTTON_SIZE)
             label.font = smallFont
             add(label)
+        }
+
+        itemLabel1 = JLabel("")
+        itemLabel2 = JLabel("")
+        itemLabel3 = JLabel("")
+        itemLabel4 = JLabel("")
+        itemLabel5 = JLabel("")
+
+        val itemLabels = arrayOf(itemLabel1, itemLabel2, itemLabel3, itemLabel4, itemLabel5)
+
+        itemLabels.forEachIndexed() {index, label ->
+            label.horizontalAlignment = SwingConstants.LEFT
+            label.bounds = Rectangle(
+                INVENTORY_X - 225,
+                INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                100,
+                INVENTORY_BUTTON_SIZE)
+            label.font = smallFont
+            add(label)
+        }
+
+        takeButton1 = JButton("")
+        takeButton2 = JButton("")
+        takeButton3 = JButton("")
+        takeButton4 = JButton("")
+        takeButton5 = JButton("")
+
+        val takeButtons = arrayOf(takeButton1, takeButton2, takeButton3, takeButton4, takeButton5)
+
+        takeButtons.forEachIndexed() {index, button ->
+            button.bounds = Rectangle(
+                INVENTORY_X - 100,
+                INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                INVENTORY_BUTTON_SIZE,
+                INVENTORY_BUTTON_SIZE
+            )
+            button.font = smallFont
+            button.addActionListener(this)
+            add(button)
         }
 
 
@@ -382,42 +466,45 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      * of the application model
      */
     fun updateView() {
-        clicksLabel.text = app.currentLocation?.name
-        descriptionLabel.text = app.currentLocation?.description
+        clicksLabel.text = app.currentLocation.name
+        descriptionLabel.text = app.currentLocation.description
         // I should probably store all these in an array and then use .forEach()
-        inventoryLabel1.text = app.currentLocation?.printItem(1)
-        inventoryLabel2.text = app.currentLocation?.printItem(2)
+        itemLabel1.text = app.getSceneItem(1)?.name ?: ""
+        itemLabel2.text = app.getSceneItem(2)?.name ?: ""
+
+        inventoryLabel1.text = app.getInventoryItem(1)?.name ?: ""
+        inventoryLabel2.text = app.getInventoryItem(2)?.name ?: ""
 //        inventoryLabel3.text = app.currentLocation?.printItem(3)
 //        inventoryLabel4.text = app.currentLocation?.printItem(4)
 //        inventoryLabel5.text = app.currentLocation?.printItem(5)
 
-        if (app.currentLocation?.adjacentScene('n') != null) {
+        if (app.currentLocation.adjacentScene('n') != null) {
             northButton.text = "↑"
         } else {
             northButton.text = ""
         }
-        if (app.currentLocation?.adjacentScene('s') != null) {
+        if (app.currentLocation.adjacentScene('s') != null) {
             southButton.text = "↓"
         } else {
             southButton.text = ""
         }
-        if (app.currentLocation?.adjacentScene('e') != null) {
+        if (app.currentLocation.adjacentScene('e') != null) {
             eastButton.text = "→"
         } else {
             eastButton.text = ""
         }
-        if (app.currentLocation?.adjacentScene('w') != null) {
+        if (app.currentLocation.adjacentScene('w') != null) {
             westButton.text = "←"
         } else {
             westButton.text = ""
         }
 
-        northButton.isEnabled = app.currentLocation?.adjacentScene('n')?.unlocked ?: false
-        eastButton.isEnabled = app.currentLocation?.adjacentScene('e')?.unlocked ?: false
-        southButton.isEnabled = app.currentLocation?.adjacentScene('s')?.unlocked ?: false
-        westButton.isEnabled = app.currentLocation?.adjacentScene('w')?.unlocked ?: false
+        northButton.isEnabled = app.currentLocation.adjacentScene('n')?.unlocked ?: false
+        eastButton.isEnabled = app.currentLocation.adjacentScene('e')?.unlocked ?: false
+        southButton.isEnabled = app.currentLocation.adjacentScene('s')?.unlocked ?: false
+        westButton.isEnabled = app.currentLocation.adjacentScene('w')?.unlocked ?: false
 
-        when (app.currentLocation?.verticalConnection) {
+        when (app.currentLocation.verticalConnection) {
             'u' -> {
                 verticalButton.text = "^"
                 verticalButton.isEnabled = true
@@ -444,8 +531,12 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
             eastButton -> app.move('e')
             southButton -> app.move('s')
             westButton -> app.move('w')
-            unlockButton -> app.currentLocation?.unlockAdjacentRooms()
             verticalButton -> app.move('v')
+
+            unlockButton -> app.currentLocation.unlockAdjacentRooms()
+
+            takeButton1 -> app.takeItem(1)
+            takeButton2 -> app.dropItem(1)
         }
         updateView()
     }

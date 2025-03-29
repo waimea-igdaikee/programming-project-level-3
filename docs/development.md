@@ -58,7 +58,7 @@ I have started work on a system for unlocking locked doors - currently, I've cod
 
 ## Date: 28/03/2025
 
-One problem I had was that my item text labels were often to long or too short. I considered fixing this by truncating the text - this keeps everything in alignment, but means you can't read the end of the item name. I am considering aligning it right.
+One problem I had was that my item text labels were often to long or too short. I considered fixing this by truncating the text - this keeps everything in alignment, but means you can't read the end of the item name. I am considering either aligning them right or having the text wrap.
 
 ![Item name overflowing](images/overFlowItemName.png)
 
