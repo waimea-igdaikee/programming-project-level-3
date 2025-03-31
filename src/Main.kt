@@ -67,14 +67,23 @@ class App() {
         val item = getSceneItem(itemNumber)
         if (item != null) {
             inventory.add(item)
-            currentLocation!!.items.remove(item)
+            currentLocation.items.remove(item)
+        }
+    }
+
+    fun useItem (itemNumber: Int) {
+        val item = getInventoryItem(itemNumber)
+        when (item?.type) {
+            "Key" -> currentLocation.unlockAdjacentRooms(item.id)
         }
     }
 
     fun dropItem(itemNumber: Int) {
         val item = getInventoryItem(itemNumber)
-            currentLocation!!.items.?add(item)
+        if (item != null) {
+            currentLocation.items.add(item)
             inventory.remove(item)
+        }
     }
 }
 
@@ -101,7 +110,7 @@ val serverRoom = Scene(Triple(5,1,2), "Server Room", "A server room, fans spinni
 
 open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = null, val description: String? = null) {
     var verticalConnection = 'n'
-    var unlocked = true
+    var locked = 0
     val items = mutableListOf<Item>()
     fun enableVerticalConnection(direction: Char) {
         if (direction == 'u' || direction == 'd') {
@@ -109,19 +118,8 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
         }
     }
 
-    fun lockRoom() {
-        unlocked = false
-    }
-
     fun addItem(obj: Item) {
         items.add(obj)
-    }
-
-    fun printItem(itemNumber: Int): String {
-        if (items.size >= itemNumber) {
-            return items[itemNumber - 1].name
-        }
-        else return ""
     }
 
     fun adjacentScene(direction: Char): Scene? {
@@ -140,10 +138,12 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
         }
     }
 
-    fun unlockAdjacentRooms() {
+    fun unlockAdjacentRooms(keyId: Int) {
         charArrayOf('n', 'e', 's', 'w').forEach { direction -> // Iterate through, unlocking each adjacent room
-            if (adjacentScene(direction) != null) {
-                adjacentScene(direction)!!.unlocked = true
+            if (adjacentScene(direction) != null ) {
+                if (adjacentScene(direction)!!.locked == keyId) {
+                    adjacentScene(direction)!!.locked = 0
+                }
             }
         }
     }
@@ -151,15 +151,17 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
     fun addToMap() {
         gameMap[location] = this
     }
-    fun addToMapLocked() {
+
+    // Makes the room locked. KeyID
+    fun addToMapLocked(keyId: Int) {
         gameMap[location] = this
-        lockRoom()
+        locked = keyId
     }
 }
 
 class Hallway(override val location: Triple<Int, Int, Int>) : Scene(Triple(0,0,0), "Hallway", "A dimly lit corridor") {}
 
-class Item(val name: String, val spawnLocations: Array<Scene>) {
+class Item(val name: String, val spawnLocations: Array<Scene>, val type: String, val id: Int) {
     fun spawn() {
         spawnLocations[spawnLocations.indices.random()].addItem(this) // Random location in list
     }
@@ -167,7 +169,9 @@ class Item(val name: String, val spawnLocations: Array<Scene>) {
 
 
 // Initialise items
-val weaponRoomKey = Item("Blue Keycard", arrayOf(messHall, serverRoom))
+val labKey = Item("Green Keycard", arrayOf(blastDoor), "Key", 0)
+
+val weaponRoomKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 1)
 
 
 fun main() {
@@ -179,13 +183,13 @@ fun main() {
     entrance.addToMap()
     hallway112.addToMap()
     blastDoor.addToMap()
-    hallway213.addToMapLocked()
+    hallway213.addToMapLocked(0)
     hallway313.addToMap()
     hallway413.addToMap()
-    hallway114.addToMapLocked()
+    hallway114.addToMapLocked(0)
     hallway115.addToMap()
     hallway215.addToMap()
-    weaponsRoom.addToMapLocked()
+    weaponsRoom.addToMapLocked(1)
     elevator1.addToMap()
     elevator1.enableVerticalConnection('d')
     messHall.addToMap()
@@ -195,6 +199,7 @@ fun main() {
     elevator2.enableVerticalConnection('u')
 
     // Initialise Items
+    labKey.spawn()
     weaponRoomKey.spawn()
 
 }
@@ -202,7 +207,7 @@ fun main() {
 /**
  * Main UI window (view)
  * Defines the UI and responds to events
- * The app model should be passwd as an argument
+ * The app model should be passed as an argument
  */
 class MainWindow(val app: App) : JFrame(), ActionListener {
 
@@ -499,10 +504,10 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
             westButton.text = ""
         }
 
-        northButton.isEnabled = app.currentLocation.adjacentScene('n')?.unlocked ?: false
-        eastButton.isEnabled = app.currentLocation.adjacentScene('e')?.unlocked ?: false
-        southButton.isEnabled = app.currentLocation.adjacentScene('s')?.unlocked ?: false
-        westButton.isEnabled = app.currentLocation.adjacentScene('w')?.unlocked ?: false
+        northButton.isEnabled = app.currentLocation.adjacentScene('n')?.locked == 0
+        eastButton.isEnabled = app.currentLocation.adjacentScene('e')?.locked == 0
+        southButton.isEnabled = app.currentLocation.adjacentScene('s')?.locked == 0
+        westButton.isEnabled = app.currentLocation.adjacentScene('w')?.locked == 0
 
         when (app.currentLocation.verticalConnection) {
             'u' -> {
@@ -533,10 +538,10 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
             westButton -> app.move('w')
             verticalButton -> app.move('v')
 
-            unlockButton -> app.currentLocation.unlockAdjacentRooms()
+            useButton1 -> app.useItem(1)
 
             takeButton1 -> app.takeItem(1)
-            takeButton2 -> app.dropItem(1)
+            dropButton1 -> app.dropItem(1)
         }
         updateView()
     }
