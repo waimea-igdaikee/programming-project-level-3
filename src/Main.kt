@@ -212,13 +212,12 @@ fun main() {
 class MainWindow(val app: App) : JFrame(), ActionListener {
 
     // Fields to hold the UI elements
-    private lateinit var clicksLabel: JLabel
+    private lateinit var titleLabel: JLabel
     private lateinit var northButton: JButton
     private lateinit var eastButton: JButton
     private lateinit var southButton: JButton
     private lateinit var westButton: JButton
     private lateinit var verticalButton: JButton
-    private lateinit var unlockButton: JButton
     private lateinit var descriptionLabel: JLabel
     private lateinit var itemsLabel: JLabel
 
@@ -287,14 +286,14 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 36)
         val smallFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
 
-        val BUTTONS_X = 100
-        val BUTTONS_Y = 100
+        val BUTTONS_X = 80
+        val BUTTONS_Y = 300
 
-        clicksLabel = JLabel("CLICK INFO HERE")
-        clicksLabel.horizontalAlignment = SwingConstants.CENTER
-        clicksLabel.bounds = Rectangle(50, 50, 500, 100)
-        clicksLabel.font = baseFont
-        add(clicksLabel)
+        titleLabel = JLabel("Title")
+        titleLabel.horizontalAlignment = SwingConstants.CENTER
+        titleLabel.bounds = Rectangle(50, 50, 500, 100)
+        titleLabel.font = baseFont
+        add(titleLabel)
 
         descriptionLabel = JLabel("DESCRIPTION HERE")
         descriptionLabel.horizontalAlignment = SwingConstants.CENTER
@@ -331,12 +330,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         verticalButton.font = baseFont
         verticalButton.addActionListener(this)     // Handle any clicks
         add(verticalButton)
-
-        unlockButton = JButton("Unlock")
-        unlockButton.bounds = Rectangle(BUTTONS_X - 50, BUTTONS_Y + 200,150,50)
-        unlockButton.font = baseFont
-        unlockButton.addActionListener(this)     // Handle any clicks
-        add(unlockButton)
 
         itemsLabel = JLabel("Items")
         itemsLabel.horizontalAlignment = SwingConstants.CENTER
@@ -471,7 +464,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      * of the application model
      */
     fun updateView() {
-        clicksLabel.text = app.currentLocation.name
+        titleLabel.text = app.currentLocation.name
         descriptionLabel.text = app.currentLocation.description
         // I should probably store all these in an array and then use .forEach()
         itemLabel1.text = app.getSceneItem(1)?.name ?: ""
