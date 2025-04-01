@@ -68,7 +68,7 @@ One problem I had was that my item text labels were often to long or too short. 
 
 I have coded my object-based inventory system. It allows for picking up, dropping and using objects. For now, I have placed some keycards around the place that can be picked up, used to unlock a door, and dropped when no longer needed:
 
-![example.png](screenshots/example.png)
+
 
 ---
 
