@@ -68,7 +68,30 @@ One problem I had was that my item text labels were often to long or too short. 
 
 I have coded my object-based inventory system. It allows for picking up, dropping and using objects. For now, I have placed some keycards around the place that can be picked up, used to unlock a door, and dropped when no longer needed:
 
+![basicInventory.gif](images/basicInventory.gif)
 
+So far, I've not worried about how tidy my UI looks, as I was more focused on the code. I am at the stage, however, where I have more than a few features, so I need to make my layout logical. After this, I will also plan the rest of my map. 
+
+Throughout my development, and indeed possibly after my game has been completed, I may want to refactor my UI. To streamline this, I will base my UI off of constants rather than using literal values for element position in my code:
+```kotlin
+val DESCRIPTION_X = 80
+val DESCRIPTION_Y = 50
+
+        val BUTTONS_X = 80
+        val BUTTONS_Y = 300
+
+        titleLabel = JLabel("Title")
+        titleLabel.horizontalAlignment = SwingConstants.LEFT
+        titleLabel.bounds = Rectangle(DESCRIPTION_X, DESCRIPTION_Y, 500, 100)
+        titleLabel.font = baseFont
+        add(titleLabel)
+
+        descriptionLabel = JLabel("DESCRIPTION HERE")
+        descriptionLabel.horizontalAlignment = SwingConstants.LEFT
+        descriptionLabel.bounds = Rectangle(DESCRIPTION_X, DESCRIPTION_Y + 50, 500, 100)
+        descriptionLabel.font = smallFont
+        add(descriptionLabel)
+```
 
 ---
 

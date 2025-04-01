@@ -286,19 +286,28 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 36)
         val smallFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
 
-        val BUTTONS_X = 80
-        val BUTTONS_Y = 300
+
+        val DESCRIPTION_X = 35
+        val DESCRIPTION_Y = 0
+        val DESCRIPTION_WIDTH = 400
+
+        val BUTTONS_X = 200
+        val BUTTONS_Y = 250
 
         titleLabel = JLabel("Title")
         titleLabel.horizontalAlignment = SwingConstants.CENTER
-        titleLabel.bounds = Rectangle(50, 50, 500, 100)
+        titleLabel.bounds = Rectangle(DESCRIPTION_X, DESCRIPTION_Y, DESCRIPTION_WIDTH, 100)
         titleLabel.font = baseFont
         add(titleLabel)
 
         descriptionLabel = JLabel("DESCRIPTION HERE")
-        descriptionLabel.horizontalAlignment = SwingConstants.CENTER
-        descriptionLabel.bounds = Rectangle(100, 150, 500, 100)
+        descriptionLabel.horizontalAlignment = SwingConstants.LEFT
+        descriptionLabel.verticalAlignment = SwingConstants.TOP
+        descriptionLabel.bounds = Rectangle(DESCRIPTION_X, DESCRIPTION_Y + 80, DESCRIPTION_WIDTH, 120)
         descriptionLabel.font = smallFont
+        descriptionLabel.foreground = Color.BLACK
+        descriptionLabel.background = Color.LIGHT_GRAY
+        descriptionLabel.isOpaque = true
         add(descriptionLabel)
 
         northButton = JButton("N")
@@ -308,40 +317,29 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         add(northButton)
 
         eastButton = JButton("E")
-        eastButton.bounds = Rectangle(BUTTONS_X + 50, BUTTONS_Y + 50,50,50)
+        eastButton.bounds = Rectangle(BUTTONS_X + 60, BUTTONS_Y + 60,50,50)
         eastButton.font = baseFont
         eastButton.addActionListener(this)     // Handle any clicks
         add(eastButton)
 
         southButton = JButton("S")
-        southButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y + 100,50,50)
+        southButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y + 120,50,50)
         southButton.font = baseFont
         southButton.addActionListener(this)     // Handle any clicks
         add(southButton)
 
         westButton = JButton("W")
-        westButton.bounds = Rectangle(BUTTONS_X - 50, BUTTONS_Y + 50,50,50)
+        westButton.bounds = Rectangle(BUTTONS_X - 60, BUTTONS_Y + 60,50,50)
         westButton.font = baseFont
         westButton.addActionListener(this)     // Handle any clicks
         add(westButton)
 
         verticalButton = JButton("-")
-        verticalButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y + 50,50,50)
+        verticalButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y + 60,50,50)
         verticalButton.font = baseFont
         verticalButton.addActionListener(this)     // Handle any clicks
         add(verticalButton)
 
-        itemsLabel = JLabel("Items")
-        itemsLabel.horizontalAlignment = SwingConstants.CENTER
-        itemsLabel.bounds = Rectangle(400, 20, 200, 100)
-        itemsLabel.font = baseFont
-        add(itemsLabel)
-
-        inventoryLabel = JLabel("Inventory")
-        inventoryLabel.horizontalAlignment = SwingConstants.CENTER
-        inventoryLabel.bounds = Rectangle(700, 20, 200, 100)
-        inventoryLabel.font = baseFont
-        add(inventoryLabel)
 
 
 //        val ITEMS_X = 500
@@ -349,10 +347,22 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
 //        val ITEMS_BUTTON_SIZE = 30
 //        val ITEMS_SPACING = 10
 
-        val INVENTORY_X = 750
-        val INVENTORY_Y = 100
+        val INVENTORY_X = 600
+        val INVENTORY_Y = 0
         val INVENTORY_BUTTON_SIZE = 30
         val INVENTORY_SPACING = 10
+
+        itemsLabel = JLabel("Items")
+        itemsLabel.horizontalAlignment = SwingConstants.LEFT
+        itemsLabel.bounds = Rectangle(INVENTORY_X, INVENTORY_Y, 200, 100)
+        itemsLabel.font = baseFont
+        add(itemsLabel)
+
+        inventoryLabel = JLabel("Inventory")
+        inventoryLabel.horizontalAlignment = SwingConstants.LEFT
+        inventoryLabel.bounds = Rectangle(INVENTORY_X + 200, INVENTORY_Y, 200, 100)
+        inventoryLabel.font = baseFont
+        add(inventoryLabel)
 
         inventoryLabel1 = JLabel("")
         inventoryLabel2 = JLabel("")
@@ -365,8 +375,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         inventoryLabels.forEachIndexed() {index, label ->
             label.horizontalAlignment = SwingConstants.LEFT
             label.bounds = Rectangle(
-                INVENTORY_X - 50,
-                INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                INVENTORY_X + 200,
+                100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
                 150,
                 INVENTORY_BUTTON_SIZE)
             label.font = smallFont
@@ -384,8 +394,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         itemLabels.forEachIndexed() {index, label ->
             label.horizontalAlignment = SwingConstants.LEFT
             label.bounds = Rectangle(
-                INVENTORY_X - 275,
-                INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                INVENTORY_X,
+                100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
                 150,
                 INVENTORY_BUTTON_SIZE)
             label.font = smallFont
@@ -402,8 +412,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
 
         takeButtons.forEachIndexed() {index, button ->
             button.bounds = Rectangle(
-                INVENTORY_X - 100,
-                INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                INVENTORY_X + 100,
+                100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
                 INVENTORY_BUTTON_SIZE,
                 INVENTORY_BUTTON_SIZE
             )
@@ -411,9 +421,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
             button.addActionListener(this)
             add(button)
         }
-
-
-
 
         useButton1 = JButton("")
         useButton2 = JButton("")
@@ -425,8 +432,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
 
         useButtons.forEachIndexed() {index, button ->
             button.bounds = Rectangle(
-                INVENTORY_X + 100,
-                INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                INVENTORY_X + 300,
+                100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
                 INVENTORY_BUTTON_SIZE,
                 INVENTORY_BUTTON_SIZE
             )
@@ -445,8 +452,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
 
         dropButtons.forEachIndexed() {index, button ->
             button.bounds = Rectangle(
-                INVENTORY_X + 150,
-                INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                INVENTORY_X + 350,
+                100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
                 INVENTORY_BUTTON_SIZE,
                 INVENTORY_BUTTON_SIZE
             )
