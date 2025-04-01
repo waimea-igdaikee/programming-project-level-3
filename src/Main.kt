@@ -169,9 +169,9 @@ class Item(val name: String, val spawnLocations: Array<Scene>, val type: String,
 
 
 // Initialise items
-val labKey = Item("Green Keycard", arrayOf(blastDoor), "Key", 0)
+val labKey = Item("Green Keycard", arrayOf(blastDoor), "Key", 1)
 
-val weaponRoomKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 1)
+val weaponRoomKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 2)
 
 
 fun main() {
@@ -183,13 +183,13 @@ fun main() {
     entrance.addToMap()
     hallway112.addToMap()
     blastDoor.addToMap()
-    hallway213.addToMapLocked(0)
+    hallway213.addToMapLocked(1)
     hallway313.addToMap()
     hallway413.addToMap()
-    hallway114.addToMapLocked(0)
+    hallway114.addToMapLocked(1)
     hallway115.addToMap()
     hallway215.addToMap()
-    weaponsRoom.addToMapLocked(1)
+    weaponsRoom.addToMapLocked(2)
     elevator1.addToMap()
     elevator1.enableVerticalConnection('d')
     messHall.addToMap()
@@ -372,9 +372,9 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         inventoryLabels.forEachIndexed() {index, label ->
             label.horizontalAlignment = SwingConstants.LEFT
             label.bounds = Rectangle(
-                INVENTORY_X,
+                INVENTORY_X - 50,
                 INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
-                100,
+                150,
                 INVENTORY_BUTTON_SIZE)
             label.font = smallFont
             add(label)
@@ -391,9 +391,9 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         itemLabels.forEachIndexed() {index, label ->
             label.horizontalAlignment = SwingConstants.LEFT
             label.bounds = Rectangle(
-                INVENTORY_X - 225,
+                INVENTORY_X - 275,
                 INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
-                100,
+                150,
                 INVENTORY_BUTTON_SIZE)
             label.font = smallFont
             add(label)
@@ -539,9 +539,22 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
             verticalButton -> app.move('v')
 
             useButton1 -> app.useItem(1)
+            useButton2 -> app.useItem(2)
+            useButton3 -> app.useItem(3)
+            useButton4 -> app.useItem(4)
+            useButton5 -> app.useItem(5)
 
             takeButton1 -> app.takeItem(1)
+            takeButton2 -> app.takeItem(2)
+            takeButton3 -> app.takeItem(3)
+            takeButton4 -> app.takeItem(4)
+            takeButton5 -> app.takeItem(5)
+
             dropButton1 -> app.dropItem(1)
+            dropButton2 -> app.dropItem(2)
+            dropButton3 -> app.dropItem(3)
+            dropButton4 -> app.dropItem(4)
+            dropButton5 -> app.dropItem(5)
         }
         updateView()
     }
