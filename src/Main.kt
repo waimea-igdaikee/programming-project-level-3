@@ -76,6 +76,12 @@ class App() {
         val item = getInventoryItem(itemNumber)
         when (item?.type) {
             "Key" -> currentLocation.unlockAdjacentRooms(item.id)
+            "Activator" -> {
+                if (currentLocation.activate(item)) {
+                    inventory.remove(item)
+                }
+            }
+
         }
     }
 
@@ -131,6 +137,8 @@ val portalControlRoom = Scene(Triple(5,3,3), "Portal Controls", "A set of levers
 open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = null, val description: String? = null) {
     var verticalConnection = 'n'
     var locked = 0
+    lateinit var activator: Item
+    var activated: Boolean = false
     val items = mutableListOf<Item>()
     fun enableVerticalConnection(direction: Char) {
         if (direction == 'u' || direction == 'd') {
@@ -172,10 +180,24 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
         gameMap[location] = this
     }
 
+    fun addActivator(activatorItem: Item) {
+        activator = activatorItem
+    }
+
     // Makes the room locked. KeyID
     fun addToMapLocked(keyId: Int) {
         gameMap[location] = this
         locked = keyId
+    }
+
+    // Activates the room to progress the game e.g. putting fuel in the generators
+    fun activate(activatorItem: Item): Boolean {
+        if (activatorItem == activator) {
+            activated = true
+            return true
+        } else {
+            return false
+        }
     }
 }
 
@@ -193,7 +215,7 @@ val facilityKey = Item("Green Keycard", arrayOf(blastDoor), "Key", 1)
 val weaponRoomKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 2)
 val labKey = Item("Orange Keycard", arrayOf(storageRoom526, storageRoom622), "Key", 3)
 
-val jerryCan = Item("Jerry Can", arrayOf(labRoom), "Generic", 4)
+val jerryCan = Item("Jerry Can", arrayOf(labRoom), "Activator", 4)
 
 
 fun main() {
@@ -249,7 +271,7 @@ fun main() {
     labKey.spawn()
 
     jerryCan.spawn()
-
+    generatorRoom.addActivator(jerryCan)
 }
 
 /**
@@ -535,6 +557,27 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         inventoryLabel3.text = app.getInventoryItem(3)?.name ?: ""
         inventoryLabel4.text = app.getInventoryItem(4)?.name ?: ""
         inventoryLabel5.text = app.getInventoryItem(5)?.name ?: ""
+
+        // Enable and disable item buttons where applicable
+        takeButton1.isEnabled = app.getSceneItem(1) != null
+        takeButton2.isEnabled = app.getSceneItem(2) != null
+        takeButton3.isEnabled = app.getSceneItem(3) != null
+        takeButton4.isEnabled = app.getSceneItem(4) != null
+        takeButton5.isEnabled = app.getSceneItem(5) != null
+
+        //useButton1.isEnabled = app.getInventoryItem(1) != null
+        useButton2.isEnabled = app.getInventoryItem(2) != null
+        useButton3.isEnabled = app.getInventoryItem(3) != null
+        useButton4.isEnabled = app.getInventoryItem(4) != null
+        useButton5.isEnabled = app.getInventoryItem(5) != null
+
+
+        dropButton1.isEnabled = app.getInventoryItem(1) != null
+        dropButton2.isEnabled = app.getInventoryItem(2) != null
+        dropButton3.isEnabled = app.getInventoryItem(3) != null
+        dropButton4.isEnabled = app.getInventoryItem(4) != null
+        dropButton5.isEnabled = app.getInventoryItem(5) != null
+
 
         if (app.currentLocation.adjacentScene('n') != null) {
             northButton.text = "↑"
