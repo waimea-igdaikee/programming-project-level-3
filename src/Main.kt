@@ -138,6 +138,7 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
         }
     }
 
+
     fun addItem(obj: Item) {
         items.add(obj)
     }
