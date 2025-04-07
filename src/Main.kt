@@ -33,24 +33,27 @@ class App() {
     // Constants defining any key values
 
     // Data fields
-    var currentLocation: Scene = entrance
+    var currentScene: Scene = entrance
     val inventory = mutableListOf<Item>()
 
 
     // Application logic functions
     fun move(dir: Char) {
-        when (dir) {
-            'n' -> currentLocation = currentLocation.adjacentScene('n')!! // Nullable as buttons disabled
-            'e' -> currentLocation = currentLocation.adjacentScene('e')!!
-            's' -> currentLocation = currentLocation.adjacentScene('s')!!
-            'w' -> currentLocation = currentLocation.adjacentScene('w')!!
-            'v' -> currentLocation = currentLocation.adjacentScene('v')!!
+        if (currentScene.adjacentScene(dir)?.locked == 0) {
+            when (dir) {
+                // Move to relevant adjacent scene. Nullable as we've surrounded it by a null check
+                'n' -> currentScene = currentScene.adjacentScene('n')!!
+                'e' -> currentScene = currentScene.adjacentScene('e')!!
+                's' -> currentScene = currentScene.adjacentScene('s')!!
+                'w' -> currentScene = currentScene.adjacentScene('w')!!
+                'v' -> currentScene = currentScene.adjacentScene('v')!!
+                }
         }
     }
 
     fun getSceneItem(itemNumber: Int): Item? {
-        return if (currentLocation.items.size >= itemNumber) {
-            currentLocation.items[itemNumber - 1]
+        return if (currentScene.items.size >= itemNumber) {
+            currentScene.items[itemNumber - 1]
         } else {
             null
         }
@@ -68,16 +71,16 @@ class App() {
         val item = getSceneItem(itemNumber)
         if (item != null) {
             inventory.add(item)
-            currentLocation.items.remove(item)
+            currentScene.items.remove(item)
         }
     }
 
     fun useItem (itemNumber: Int) {
         val item = getInventoryItem(itemNumber)
         when (item?.type) {
-            "Key" -> currentLocation.unlockAdjacentRooms(item.id)
+            "Key" -> currentScene.unlockAdjacentRooms(item.id)
             "Activator" -> {
-                if (currentLocation.activate(item)) {
+                if (currentScene.activate(item)) {
                     inventory.remove(item)
                 }
             }
@@ -88,7 +91,7 @@ class App() {
     fun dropItem(itemNumber: Int) {
         val item = getInventoryItem(itemNumber)
         if (item != null) {
-            currentLocation.items.add(item)
+            currentScene.items.add(item)
             inventory.remove(item)
         }
     }
@@ -99,14 +102,14 @@ val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>()
 
 // Define the map
 val entrance = Scene( Triple(1,1,1), "Entrance", "The entrance to the facility")
-val hallway112 = Hallway(Triple(1,1,2))
+val hallway112 = Hallway(Triple(1,1,2), true)
 val blastDoor = Scene(Triple(1,1,3), "Blast Door", "A reinforced blast door")
-val hallway213 = Hallway(Triple(2,1,3))
-val hallway313 = Hallway(Triple(3,1,3))
-val hallway413 = Hallway(Triple(4,1,3))
-val hallway114 = Hallway(Triple(1,1,4))
-val hallway115 = Hallway(Triple(1,1,5))
-val hallway215 = Hallway(Triple(2,1,5))
+val hallway213 = Hallway(Triple(2,1,3), true)
+val hallway313 = Hallway(Triple(3,1,3), true)
+val hallway413 = Hallway(Triple(4,1,3), true)
+val hallway114 = Hallway(Triple(1,1,4), true)
+val hallway115 = Hallway(Triple(1,1,5), true)
+val hallway215 = Hallway(Triple(2,1,5), true)
 val weaponsRoom = Scene(Triple(3,1,2), "Weapons Room", "A open room, shelves lines with weapons")
 val elevator315 = Scene(Triple(3,1,5), "Elevator", "An untrustworthy elevator at the top")
 val messHall = Scene(Triple(4,1,4), "Mess Hall", "An untidy mess hall, with flickering lights")
@@ -121,8 +124,8 @@ val hallway623 = Hallway(Triple(6,2,3))
 val hallway423 = Hallway(Triple(4,2,3))
 val storageRoom526 = Scene(Triple(5,2,6), "Storage Room", "A dank storage room")
 val storageRoom622 = Scene(Triple(6,2,2), "Storage Room", "A smelly storage room")
-val controlRoom = Scene(Triple(4,2,4),"Control Room", "A control room with an ancient computer whirring in the centre")
-val generatorRoom = Scene(Triple(3,2,3),"Generator Room", "An open hall with huge diesel generators")
+val controlRoom = Scene(Triple(4,2,4),"Control Room", "An dark room. There is a massive computer in the middle - if just there was a way to turn on the power...", "A bright room. There is a massive computer in the middle demanding a keycard...")
+val generatorRoom = Scene(Triple(3,2,3),"Generator Room", "An open hall with huge diesel generators", "An open hall humming with the running sound of huge diesel generators")
 val elevator724 = Scene(Triple(7,2,4), "Elevator", "A sharp ledge to an empty elevator shaft. There's some dangling wires you could climb down - if you dared")
 val labRoom = Scene(Triple(5,2,3), "Lab Room", "A chemistry lab with abandoned experiments in petri dishes and beakers. There are some jerry cans in the corner.")
 
@@ -131,13 +134,20 @@ val hallway634 = Hallway(Triple(6,3,4))
 val hallway633 = Hallway(Triple(6,3,3))
 val hallway635 = Hallway(Triple(6,3,5))
 val portalRoom = Scene(Triple(5,3,5), "Portal Chamber", "The frame of what looks to be a portal. It is inscribed with glowing runes.")
-val portalControlRoom = Scene(Triple(5,3,3), "Portal Controls", "A set of levers and buttons that seems to control the portal.")
+val portalControlRoom = Scene(Triple(5,3,3), "Portal Controls", "An array of levers and buttons that appear to control the portal.")
+
+val unpoweredHallways = arrayOf(hallway425, hallway525, hallway625, hallway624, hallway623, hallway423, hallway634, hallway633, hallway635)
 
 
-open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = null, val description: String? = null) {
+open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = null, var description: String? = null, val activatedDescription: String? = description) {
     var verticalConnection = 'n'
     var locked = 0
+
     lateinit var activator: Item
+
+    // For activating other scenes that change their description when this scene is activated, e.g. turning on the lights when the generator is activated
+    lateinit var scenesToActivate: Array<Scene>
+
     var activated: Boolean = false
     val items = mutableListOf<Item>()
     fun enableVerticalConnection(direction: Char) {
@@ -181,8 +191,9 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
         gameMap[location] = this
     }
 
-    fun addActivator(activatorItem: Item) {
+    fun addActivator(activatorItem: Item, scenesToActivate: Array<Scene>) {
         activator = activatorItem
+        this.scenesToActivate = scenesToActivate
     }
 
     // Makes the room locked. KeyID
@@ -194,7 +205,9 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
     // Activates the room to progress the game e.g. putting fuel in the generators
     fun activate(activatorItem: Item): Boolean {
         if (activatorItem == activator) {
-            activated = true
+            for (scene in scenesToActivate) {
+                scene.description = scene.activatedDescription
+            }
             return true
         } else {
             return false
@@ -202,7 +215,7 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
     }
 }
 
-class Hallway(override val location: Triple<Int, Int, Int>) : Scene(Triple(0,0,0), "Hallway", "A dimly lit corridor") {}
+class Hallway(override val location: Triple<Int, Int, Int>, powered: Boolean = false) : Scene(Triple(0,0,0), "Hallway", if (powered) "A narrow hallway with overhead lights flickering" else "A narrow, dark hallway", "A narrow hallway with overhead lights flickering") {}
 
 class Item(val name: String, val spawnLocations: Array<Scene>, val type: String, val id: Int) {
     fun spawn() {
@@ -216,7 +229,7 @@ val facilityKey = Item("Green Keycard", arrayOf(blastDoor), "Key", 1)
 val weaponRoomKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 2)
 val labKey = Item("Orange Keycard", arrayOf(storageRoom526, storageRoom622), "Key", 3)
 
-val jerryCan = Item("Jerry Can", arrayOf(labRoom), "Activator", 4)
+val jerryCan = Item("Jerry Can", arrayOf(labRoom) + unpoweredHallways, "Activator", 4)
 
 
 fun main() {
@@ -272,7 +285,8 @@ fun main() {
     labKey.spawn()
 
     jerryCan.spawn()
-    generatorRoom.addActivator(jerryCan)
+    // Using the jerry can in the generator room activates the controlRoom
+    generatorRoom.addActivator(jerryCan, arrayOf(generatorRoom, controlRoom))
 }
 
 /**
@@ -387,30 +401,35 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         northButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y,50,50)
         northButton.font = baseFont
         northButton.addActionListener(this)     // Handle any clicks
+        northButton.isFocusable = false
         add(northButton)
 
         eastButton = JButton("E")
         eastButton.bounds = Rectangle(BUTTONS_X + 60, BUTTONS_Y + 60,50,50)
         eastButton.font = baseFont
         eastButton.addActionListener(this)     // Handle any clicks
+        eastButton.isFocusable = false
         add(eastButton)
 
         southButton = JButton("S")
         southButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y + 120,50,50)
         southButton.font = baseFont
         southButton.addActionListener(this)     // Handle any clicks
+        southButton.isFocusable = false
         add(southButton)
 
         westButton = JButton("W")
         westButton.bounds = Rectangle(BUTTONS_X - 60, BUTTONS_Y + 60,50,50)
         westButton.font = baseFont
         westButton.addActionListener(this)     // Handle any clicks
+        westButton.isFocusable = false
         add(westButton)
 
         verticalButton = JButton("-")
         verticalButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y + 60,50,50)
         verticalButton.font = baseFont
         verticalButton.addActionListener(this)     // Handle any clicks
+        verticalButton.isFocusable = false
         add(verticalButton)
 
 
@@ -492,6 +511,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
             )
             button.font = smallFont
             button.addActionListener(this)
+            button.isFocusable = false
             add(button)
         }
 
@@ -512,6 +532,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
             )
             button.font = smallFont
             button.addActionListener(this)
+            button.isFocusable = false
             add(button)
         }
 
@@ -532,6 +553,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
             )
             button.font = smallFont
             button.addActionListener(this)
+            button.isFocusable = false
             add(button)
         }
     }
@@ -544,8 +566,9 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
      * of the application model
      */
     fun updateView() {
-        titleLabel.text = app.currentLocation.name
-        descriptionLabel.text = "<html>" + app.currentLocation.description + "</html>" // Wrap in html tags to enable line wrapping
+        requestFocus()
+        titleLabel.text = app.currentScene.name
+        descriptionLabel.text = "<html>" + app.currentScene.description + "</html>" // Wrap in html tags to enable line wrapping
         // I should probably store all these in an array and then use .forEach()
         itemLabel1.text = app.getSceneItem(1)?.name ?: ""
         itemLabel2.text = app.getSceneItem(2)?.name ?: ""
@@ -580,33 +603,33 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         dropButton5.isEnabled = app.getInventoryItem(5) != null
 
 
-        if (app.currentLocation.adjacentScene('n') != null) {
+        if (app.currentScene.adjacentScene('n') != null) {
             northButton.text = "↑"
         } else {
             northButton.text = ""
         }
-        if (app.currentLocation.adjacentScene('s') != null) {
+        if (app.currentScene.adjacentScene('s') != null) {
             southButton.text = "↓"
         } else {
             southButton.text = ""
         }
-        if (app.currentLocation.adjacentScene('e') != null) {
+        if (app.currentScene.adjacentScene('e') != null) {
             eastButton.text = "→"
         } else {
             eastButton.text = ""
         }
-        if (app.currentLocation.adjacentScene('w') != null) {
+        if (app.currentScene.adjacentScene('w') != null) {
             westButton.text = "←"
         } else {
             westButton.text = ""
         }
 
-        northButton.isEnabled = app.currentLocation.adjacentScene('n')?.locked == 0
-        eastButton.isEnabled = app.currentLocation.adjacentScene('e')?.locked == 0
-        southButton.isEnabled = app.currentLocation.adjacentScene('s')?.locked == 0
-        westButton.isEnabled = app.currentLocation.adjacentScene('w')?.locked == 0
+        northButton.isEnabled = app.currentScene.adjacentScene('n')?.locked == 0
+        eastButton.isEnabled = app.currentScene.adjacentScene('e')?.locked == 0
+        southButton.isEnabled = app.currentScene.adjacentScene('s')?.locked == 0
+        westButton.isEnabled = app.currentScene.adjacentScene('w')?.locked == 0
 
-        when (app.currentLocation.verticalConnection) {
+        when (app.currentScene.verticalConnection) {
             'u' -> {
                 verticalButton.text = "^"
                 verticalButton.isEnabled = true
@@ -660,12 +683,14 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     }
 
     override fun keyPressed(e: KeyEvent?) {
-        println("Down: ${e?.keyCode}")
+        println("${e?.keyCode}")
 
-        // Check which key was pressed and act upon it
+//      Check which key was pressed and act upon it
         when (e?.keyCode) {
-            KeyEvent.VK_UP    -> print("Vdown")
-            KeyEvent.VK_DOWN  -> print("Vup")
+            37 -> app.move('w')
+            38 -> app.move('n')
+            39 -> app.move('e')
+            40 -> app.move('s')
         }
 
         // Ensure view matched the updated app model data
