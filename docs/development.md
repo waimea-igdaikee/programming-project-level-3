@@ -95,9 +95,9 @@ val DESCRIPTION_Y = 50
 
 ---
 
-## Date: xx/xx/20xx
+## Date: 09/04/2025
 
-Example description and notes. Example description and notes. Example description and notes. Example description and notes. Example description and notes. Example description and notes.
+I had a problem where I could activate scenes before they logically could be activated - for example, the finger could activate the control room even before it was powered up. I fixed this by adding a variable to the scene class called `readyForActivation`. If this variable is false, the finger can't be used, keeping the logical flow of the game. 
 
 ![example.png](screenshots/example.png)
 

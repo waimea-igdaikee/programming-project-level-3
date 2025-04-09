@@ -14,6 +14,7 @@
 
 
 import com.formdev.flatlaf.FlatDarkLaf
+import jdk.jfr.Description
 import java.awt.*
 import java.awt.event.*
 import javax.swing.*
@@ -80,7 +81,7 @@ class App() {
         when (item?.type) {
             "Key" -> currentScene.unlockAdjacentRooms(item.id)
             "Activator" -> {
-                if (currentScene.activate(item)) {
+                if (currentScene.activate(item)) { // if success
                     inventory.remove(item)
                 }
             }
@@ -110,7 +111,7 @@ val hallway413 = Hallway(Triple(4,1,3), true)
 val hallway114 = Hallway(Triple(1,1,4), true)
 val hallway115 = Hallway(Triple(1,1,5), true)
 val hallway215 = Hallway(Triple(2,1,5), true)
-val weaponsRoom = Scene(Triple(3,1,2), "Weapons Room", "A open room, shelves lines with weapons")
+val medBay = Scene(Triple(3,1,2), "Medical Bay", "An infirmary. It stinks of rot - there's a pile of body parts in the corner")
 val elevator315 = Scene(Triple(3,1,5), "Elevator", "An untrustworthy elevator at the top")
 val messHall = Scene(Triple(4,1,4), "Mess Hall", "An untidy mess hall, with flickering lights")
 val computerRoom = Scene(Triple(5,1,3), "Computer Room", "A computer room with seemingly outdated technology")
@@ -124,8 +125,8 @@ val hallway623 = Hallway(Triple(6,2,3))
 val hallway423 = Hallway(Triple(4,2,3))
 val storageRoom526 = Scene(Triple(5,2,6), "Storage Room", "A dank storage room")
 val storageRoom622 = Scene(Triple(6,2,2), "Storage Room", "A smelly storage room")
-val controlRoom = Scene(Triple(4,2,4),"Control Room", "An dark room. There is a massive computer in the middle - if just there was a way to turn on the power...", "A bright room. There is a massive computer in the middle demanding a keycard...")
-val generatorRoom = Scene(Triple(3,2,3),"Generator Room", "An open hall with huge diesel generators", "An open hall humming with the running sound of huge diesel generators")
+val controlRoom = Scene(Triple(4,2,4),"Control Room", "An dark room. There is a massive computer in the middle - if just there was a way to turn on the power...", "A bright room. There is a massive computer in the middle demanding a fingerprint...", "A bright room. The computer has accepted the finger - and seems to have enabled something down below...")
+val generatorRoom = Scene(Triple(3,2,3),"Generator Room", "An open hall with huge diesel generators", "An open hall with huge diesel generators", "An open hall humming with the running sound of huge diesel generators",1)
 val elevator724 = Scene(Triple(7,2,4), "Elevator", "A sharp ledge to an empty elevator shaft. There's some dangling wires you could climb down - if you dared")
 val labRoom = Scene(Triple(5,2,3), "Lab Room", "A chemistry lab with abandoned experiments in petri dishes and beakers. There are some jerry cans in the corner.")
 
@@ -138,17 +139,18 @@ val portalControlRoom = Scene(Triple(5,3,3), "Portal Controls", "An array of lev
 
 val unpoweredHallways = arrayOf(hallway425, hallway525, hallway625, hallway624, hallway623, hallway423, hallway634, hallway633, hallway635)
 
+// 
 
-open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = null, var description: String? = null, val activatedDescription: String? = description) {
+
+open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = null, var description: String? = null, val poweredDescription: String? = description, val activatedDescription: String? = poweredDescription, var activated: Int? = 0) {
     var verticalConnection = 'n'
     var locked = 0
 
-    lateinit var activator: Item
+     var activator: Item? = null
 
     // For activating other scenes that change their description when this scene is activated, e.g. turning on the lights when the generator is activated
     lateinit var scenesToActivate: Array<Scene>
 
-    var activated: Boolean = false
     val items = mutableListOf<Item>()
     fun enableVerticalConnection(direction: Char) {
         if (direction == 'u' || direction == 'd') {
@@ -204,9 +206,23 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
 
     // Activates the room to progress the game e.g. putting fuel in the generators
     fun activate(activatorItem: Item): Boolean {
-        if (activatorItem == activator) {
+        if (activated == stageForActivation && activatorItem == activator) {
             for (scene in scenesToActivate) {
                 scene.description = scene.activatedDescription
+                scene.activated ==
+            }
+
+        }
+
+
+
+
+
+        if (activatorItem == activator) {
+            if (activated == 1) {
+
+            }
+            else {
             }
             return true
         } else {
@@ -226,10 +242,12 @@ class Item(val name: String, val spawnLocations: Array<Scene>, val type: String,
 
 // Initialise items
 val facilityKey = Item("Green Keycard", arrayOf(blastDoor), "Key", 1)
-val weaponRoomKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 2)
+val medBayKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 2)
 val labKey = Item("Orange Keycard", arrayOf(storageRoom526, storageRoom622), "Key", 3)
 
-val jerryCan = Item("Jerry Can", arrayOf(labRoom) + unpoweredHallways, "Activator", 4)
+// Activator items
+val finger = Item("Rotting Finger", arrayOf(medBay), "Activator", 5)
+val jerryCan = Item("Jerry Can", arrayOf(labRoom), "Activator", 4)
 
 
 fun main() {
@@ -247,13 +265,12 @@ fun main() {
     hallway114.addToMapLocked(1)
     hallway115.addToMap()
     hallway215.addToMap()
-    weaponsRoom.addToMapLocked(2)
+    medBay.addToMapLocked(2)
     elevator315.addToMap()
     elevator315.enableVerticalConnection('d')
     messHall.addToMap()
     computerRoom.addToMap()
     serverRoom.addToMap()
-
 
     elevator325.addToMap()
     elevator325.enableVerticalConnection('u')
@@ -281,12 +298,14 @@ fun main() {
 
     // Initialise Items
     facilityKey.spawn()
-    weaponRoomKey.spawn()
+    medBayKey.spawn()
     labKey.spawn()
 
+    finger.spawn()
+    controlRoom.addActivator(finger, arrayOf(portalControlRoom))
     jerryCan.spawn()
-    // Using the jerry can in the generator room activates the controlRoom
-    generatorRoom.addActivator(jerryCan, arrayOf(generatorRoom, controlRoom))
+    // Using the jerry can in the generator room activates the generator room, control room, and some hallways
+    generatorRoom.addActivator(jerryCan, arrayOf(generatorRoom, controlRoom) + unpoweredHallways)
 }
 
 /**
