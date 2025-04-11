@@ -10,33 +10,33 @@ This checklist can be used to gauge progress towards different levels of success
 
 The game functions correctly and meets the specification:
 - [ ] The game is **playable**
-- [ ] The game has a **GUI** with a range of controls
+- [x] The game has a **GUI** with a range of controls
 - [ ] The **instructions** for the game are available via the GUI
-- [ ] Player provides game **inputs via the GUI** (e.g. moves, actions)
-- [ ] The **current status** of the game is **shown in the GUI**, updated each player input
-- [ ] The game is based on a **non-trivial map**
-- [ ] The player can **move between locations**
+- [x] Player provides game **inputs via the GUI** (e.g. moves, actions)
+- [x] The **current status** of the game is **shown in the GUI**, updated each player input
+- [x] The game is based on a **non-trivial map**
+- [x] The player can **move between locations**
 - [ ] The player has a **clear purpose** they can attempt to achieve
 - [ ] A **win / end / loss state** is possible
 
 ### Program Code
 
 The program stores data using:
-- [ ] **Variables** of at least two types (e.g. int, text, boolean)
+- [x] **Variables** of at least two types (e.g. int, text, boolean)
 
 The program structure:
-- [ ] Defines and implements a **graphical user interface (GUI)**
-- [ ] Makes use of user-defined OOP **classes** from which **objects** are instantiated
-- [ ] Uses **functions** / **methods** to break up the code logically
-- [ ] Contains **sequences** of instructions
-- [ ] Uses **conditional** instructions to control the program flow
-- [ ] Uses program **branches** (if...else, when, etc.)
-- [ ] Uses **iteration** (loops) to repeat things (for, while, etc.)
+- [x] Defines and implements a **graphical user interface (GUI)**
+- [x] Makes use of user-defined OOP **classes** from which **objects** are instantiated
+- [x] Uses **functions** / **methods** to break up the code logically
+- [x] Contains **sequences** of instructions
+- [x] Uses **conditional** instructions to control the program flow
+- [x] Uses program **branches** (if...else, when, etc.)
+- [x] Uses **iteration** (loops) to repeat things (for, while, etc.)
 
 ### Program Documentation
 
 The program code:
-- [ ] Is **indented** correctly
+- [x] Is **indented** correctly
 - [ ] Is **laid-out clearly**
 - [ ] Contains **comments** that help in understanding how it works
 
@@ -60,22 +60,22 @@ The program has been tested and there is documented evidence that:
 ### Program Code
 
 The program stores data using variables, where:
-- [ ] Variable **names are well-chosen** (relating to their purpose)
-- [ ] Variable names **begin with lowercase**
-- [ ] Naming is consistent, either **camelCase or snake_case**
+- [x] Variable **names are well-chosen** (relating to their purpose)
+- [x] Variable names **begin with lowercase**
+- [x] Naming is consistent, either **camelCase or snake_case**
 - [ ] Variables are **scoped appropriately** (global or local to a function)
 - [ ] **Global** variables are only used if **genuinely needed**
 
 The program uses OOP classes and objects appropriately, where:
-- [ ] OOP class **names are well-chosen**, relating to their functionality
-- [ ] OOP class names **begin with uppercase**
-- [ ] OOP classes contain **well-chosen data fields**
-- [ ] OOP classes contain **well-chosen methods**
+- [x] OOP class **names are well-chosen**, relating to their functionality
+- [x] OOP class names **begin with uppercase**
+- [x] OOP classes contain **well-chosen data fields**
+- [x] OOP classes contain **well-chosen methods**
 
 The program uses functions appropriately, where:
-- [ ] Function **names are well-chosen**, relating to their functionality 
-- [ ] Functions use **parameters** to pass data into them as needed
-- [ ] Functions provide a **return value** to the calling code if needed
+- [x] Function **names are well-chosen**, relating to their functionality 
+- [x] Functions use **parameters** to pass data into them as needed
+- [x] Functions provide a **return value** to the calling code if needed
 
 ### Game GUI
 
@@ -105,7 +105,7 @@ The program has been tested using:
 ### Program Code
 
 Program flexibility and maintainability is aided by:
-- [ ] **Constants** being used to define key values, and used throughout the program
+- [x] **Constants** being used to define key values, and used throughout the program
 - [ ] Variable values being **derived at run-time** (from other variables / constants)
 - [ ] Literal values only being used if they **make sense**, and they don't impact program flexibility
 
@@ -113,7 +113,7 @@ Program flexibility and maintainability is aided by good program structure:
 - [ ] Conditions, branching, loops and functions are used **effectively**
 - [ ] Procedures are **efficient** (minimal iterations, etc.)
 - [ ] **Minimal duplication of code** (instead using loops, or having multiple calls to a single function)
-- [ ] OOP classes are **well-chosen and logical**, with a clearly defined purpose
+- [x] OOP classes are **well-chosen and logical**, with a clearly defined purpose
 - [ ] Functions are **well-chosen and logical**, with a clearly defined purpose
 - [ ] The classes and functions chosen represent a **logical decomposition** of the task
 
@@ -121,7 +121,7 @@ Program flexibility and maintainability is aided by good program structure:
 
 The game GUI:
 - [ ] Is **well laid out** with care and attention paid to details
-- [ ] Gives a **good uer experience (UX)**
+- [ ] Gives a **good user experience (UX)**
 
 ### Program Documentation
 

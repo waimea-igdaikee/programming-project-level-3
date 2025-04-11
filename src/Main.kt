@@ -142,7 +142,14 @@ val unpoweredHallways = arrayOf(hallway425, hallway525, hallway625, hallway624, 
 // 
 
 
-open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = null, var description: String? = null, val poweredDescription: String? = description, val activatedDescription: String? = poweredDescription, var activated: Int? = 0) {
+open class Scene(
+    open val location: Triple<Int, Int, Int>,
+    val name: String? = null,
+    var description: String? = null,
+    val poweredDescription: String? = description,
+    val activatedDescription: String? = poweredDescription,
+    var activated: Int = 0
+) {
     var verticalConnection = 'n'
     var locked = 0
 
@@ -204,29 +211,16 @@ open class Scene(open val location: Triple<Int, Int, Int>, val name: String? = n
         locked = keyId
     }
 
+    
+
     // Activates the room to progress the game e.g. putting fuel in the generators
     fun activate(activatorItem: Item): Boolean {
-        if (activated == stageForActivation && activatorItem == activator) {
-            for (scene in scenesToActivate) {
-                scene.description = scene.activatedDescription
-                scene.activated ==
-            }
-
-        }
-
-
-
-
-
-        if (activatorItem == activator) {
-            if (activated == 1) {
-
-            }
-            else {
-            }
+        if (activated == 1 && activator == activatorItem) {
+            activated = 2
             return true
-        } else {
-            return false
+        }
+        else if (activated == 0 && activatorItem == null) {
+
         }
     }
 }
