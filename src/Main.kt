@@ -29,7 +29,7 @@ import javax.swing.*
  * This is the place where any application data should be
  * stored, plus any application logic functions
  */
-class App() {
+class App {
     // Constants defining any key values
 
     // Data fields
@@ -386,6 +386,9 @@ fun main() {
  */
 class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
 
+    // Title and instructions popup
+    private lateinit var popUp: PopUpDialog
+
 
     // Fields to hold the UI elements
     private lateinit var titleLabel: JLabel
@@ -397,37 +400,34 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     private lateinit var descriptionLabel: JLabel
     private lateinit var itemsLabel: JLabel
 
+    private lateinit var helpButton: JButton
+    private lateinit var winButton: JButton
 
     private lateinit var itemLabel1: JLabel
     private lateinit var itemLabel2: JLabel
     private lateinit var itemLabel3: JLabel
     private lateinit var itemLabel4: JLabel
-    private lateinit var itemLabel5: JLabel
 
     private lateinit var inventoryLabel: JLabel
     private lateinit var inventoryLabel1: JLabel
     private lateinit var inventoryLabel2: JLabel
     private lateinit var inventoryLabel3: JLabel
     private lateinit var inventoryLabel4: JLabel
-    private lateinit var inventoryLabel5: JLabel
 
     private lateinit var takeButton1 : JButton
     private lateinit var takeButton2 : JButton
     private lateinit var takeButton3 : JButton
     private lateinit var takeButton4 : JButton
-    private lateinit var takeButton5 : JButton
 
     private lateinit var useButton1 : JButton
     private lateinit var useButton2 : JButton
     private lateinit var useButton3 : JButton
     private lateinit var useButton4 : JButton
-    private lateinit var useButton5 : JButton
 
     private lateinit var dropButton1 : JButton
     private lateinit var dropButton2 : JButton
     private lateinit var dropButton3 : JButton
     private lateinit var dropButton4 : JButton
-    private lateinit var dropButton5 : JButton
 
     /**
      * Configure the UI and display it
@@ -439,7 +439,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         setLocationRelativeTo(null)     // Centre the window
         isVisible = true                // Make it visible
 
-        updateView()                   // Initialise the UI
+        updateView()                    // Initialise the UI
+        popUp.isVisible = true          // Show the title / instructions dialog
     }
 
     /**
@@ -459,18 +460,31 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
      * Populate the UI with UI controls
      */
     private fun addControls() {
-        val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 36)
-        val smallFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
-
         this.addKeyListener(this)
 
+
+        popUp = PopUpDialog()
+
+        // Define important constants for the controls
+        val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 36)
+        val smallFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
 
         val DESCRIPTION_X = 35
         val DESCRIPTION_Y = 0
         val DESCRIPTION_WIDTH = 400
 
+        val INVENTORY_X = 600
+        val INVENTORY_Y = 0
+        val INVENTORY_BUTTON_SIZE = 30
+        val INVENTORY_SPACING = 10
+
         val BUTTONS_X = 200
         val BUTTONS_Y = 250
+
+        /**
+         * Set up all the labels and buttons.
+         * Some, like the inventory controls, are iterated over to save lines of code.
+         */
 
         titleLabel = JLabel("Title")
         titleLabel.horizontalAlignment = SwingConstants.CENTER
@@ -487,6 +501,25 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         descriptionLabel.isOpaque = true
         add(descriptionLabel)
 
+        helpButton = JButton("?")
+        helpButton.bounds = Rectangle(600, 0,50,50)
+        helpButton.font = baseFont
+        helpButton.addActionListener(this)     // Handle any clicks
+        helpButton.isFocusable = false
+        add(helpButton)
+
+        winButton = JButton("Enter the portal...")
+        winButton.bounds = Rectangle(0, 300,300,50)
+        winButton.font = baseFont
+        winButton.addActionListener(this)     // Handle any clicks
+        winButton.isFocusable = false
+        winButton.isEnabled = false
+        winButton.isVisible = false
+        add(winButton)
+
+
+
+        // Movement buttons
         northButton = JButton("N")
         northButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y,50,50)
         northButton.font = baseFont
@@ -522,17 +555,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         verticalButton.isFocusable = false
         add(verticalButton)
 
-
-//        val ITEMS_X = 500
-//        val ITEMS_Y = 100
-//        val ITEMS_BUTTON_SIZE = 30
-//        val ITEMS_SPACING = 10
-
-        val INVENTORY_X = 600
-        val INVENTORY_Y = 0
-        val INVENTORY_BUTTON_SIZE = 30
-        val INVENTORY_SPACING = 10
-
         itemsLabel = JLabel("Items")
         itemsLabel.horizontalAlignment = SwingConstants.LEFT
         itemsLabel.bounds = Rectangle(INVENTORY_X, INVENTORY_Y, 200, 100)
@@ -549,11 +571,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         inventoryLabel2 = JLabel("")
         inventoryLabel3 = JLabel("")
         inventoryLabel4 = JLabel("")
-        inventoryLabel5 = JLabel("")
-
-        val inventoryLabels = arrayOf(inventoryLabel1, inventoryLabel2, inventoryLabel3, inventoryLabel4, inventoryLabel5)
-
-        inventoryLabels.forEachIndexed() {index, label ->
+        val inventoryLabels = arrayOf(inventoryLabel1, inventoryLabel2, inventoryLabel3, inventoryLabel4)
+        inventoryLabels.forEachIndexed { index, label ->
             label.horizontalAlignment = SwingConstants.RIGHT
             label.bounds = Rectangle(
                 INVENTORY_X + 140,
@@ -568,11 +587,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         itemLabel2 = JLabel("")
         itemLabel3 = JLabel("")
         itemLabel4 = JLabel("")
-        itemLabel5 = JLabel("")
-
-        val itemLabels = arrayOf(itemLabel1, itemLabel2, itemLabel3, itemLabel4, itemLabel5)
-
-        itemLabels.forEachIndexed() {index, label ->
+        val itemLabels = arrayOf(itemLabel1, itemLabel2, itemLabel3, itemLabel4)
+        itemLabels.forEachIndexed { index, label ->
             label.horizontalAlignment = SwingConstants.RIGHT
             label.bounds = Rectangle(
                 INVENTORY_X - 60,
@@ -587,11 +603,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         takeButton2 = JButton("")
         takeButton3 = JButton("")
         takeButton4 = JButton("")
-        takeButton5 = JButton("")
-
-        val takeButtons = arrayOf(takeButton1, takeButton2, takeButton3, takeButton4, takeButton5)
-
-        takeButtons.forEachIndexed() {index, button ->
+        val takeButtons = arrayOf(takeButton1, takeButton2, takeButton3, takeButton4)
+        takeButtons.forEachIndexed { index, button ->
             button.bounds = Rectangle(
                 INVENTORY_X + 100,
                 100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
@@ -608,11 +621,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         useButton2 = JButton("")
         useButton3 = JButton("")
         useButton4 = JButton("")
-        useButton5 = JButton("")
-
-        val useButtons = arrayOf(useButton1, useButton2, useButton3, useButton4, useButton5)
-
-        useButtons.forEachIndexed() {index, button ->
+        val useButtons = arrayOf(useButton1, useButton2, useButton3, useButton4)
+        useButtons.forEachIndexed { index, button ->
             button.bounds = Rectangle(
                 INVENTORY_X + 300,
                 100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
@@ -629,11 +639,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         dropButton2 = JButton("")
         dropButton3 = JButton("")
         dropButton4 = JButton("")
-        dropButton5 = JButton("")
-
-        val dropButtons = arrayOf(dropButton1, dropButton2, dropButton3, dropButton4, dropButton5)
-
-        dropButtons.forEachIndexed() {index, button ->
+        val dropButtons = arrayOf(dropButton1, dropButton2, dropButton3, dropButton4)
+        dropButtons.forEachIndexed { index, button ->
             button.bounds = Rectangle(
                 INVENTORY_X + 350,
                 100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
@@ -648,8 +655,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     }
 
 
-
-
     /**
      * Update the UI controls based on the current state
      * of the application model
@@ -658,38 +663,34 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         requestFocus()
         titleLabel.text = app.currentScene.name
         descriptionLabel.text = "<html>" + app.currentScene.currentDescription + "</html>" // Wrap in html tags to enable line wrapping
+
         // I should probably store all these in an array and then use .forEach()
         itemLabel1.text = app.getSceneItem(1)?.name ?: ""
         itemLabel2.text = app.getSceneItem(2)?.name ?: ""
         itemLabel3.text = app.getSceneItem(3)?.name ?: ""
         itemLabel4.text = app.getSceneItem(4)?.name ?: ""
-        itemLabel5.text = app.getSceneItem(5)?.name ?: ""
 
         inventoryLabel1.text = app.getInventoryItem(1)?.name ?: ""
         inventoryLabel2.text = app.getInventoryItem(2)?.name ?: ""
         inventoryLabel3.text = app.getInventoryItem(3)?.name ?: ""
         inventoryLabel4.text = app.getInventoryItem(4)?.name ?: ""
-        inventoryLabel5.text = app.getInventoryItem(5)?.name ?: ""
 
         // Enable and disable item buttons where applicable
-        takeButton1.isEnabled = app.getSceneItem(1) != null
-        takeButton2.isEnabled = app.getSceneItem(2) != null
-        takeButton3.isEnabled = app.getSceneItem(3) != null
-        takeButton4.isEnabled = app.getSceneItem(4) != null
-        takeButton5.isEnabled = app.getSceneItem(5) != null
+        takeButton1.isEnabled = (app.getSceneItem(1) != null) && (app.getInventoryItem(4) == null)
+        takeButton2.isEnabled = app.getSceneItem(2) != null && (app.getInventoryItem(4) == null)
+        takeButton3.isEnabled = app.getSceneItem(3) != null && (app.getInventoryItem(4) == null)
+        takeButton4.isEnabled = app.getSceneItem(4) != null && (app.getInventoryItem(4) == null)
 
         //useButton1.isEnabled = app.getInventoryItem(1) != null
         useButton2.isEnabled = app.getInventoryItem(2) != null
         useButton3.isEnabled = app.getInventoryItem(3) != null
         useButton4.isEnabled = app.getInventoryItem(4) != null
-        useButton5.isEnabled = app.getInventoryItem(5) != null
 
 
         dropButton1.isEnabled = app.getInventoryItem(1) != null
         dropButton2.isEnabled = app.getInventoryItem(2) != null
         dropButton3.isEnabled = app.getInventoryItem(3) != null
         dropButton4.isEnabled = app.getInventoryItem(4) != null
-        dropButton5.isEnabled = app.getInventoryItem(5) != null
 
 
         if (app.currentScene.adjacentScene('n') != null) {
@@ -732,6 +733,9 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
                 verticalButton.isEnabled = false
             }
         }
+
+        winButton.isEnabled = (app.currentScene == portalRoom) && (portalRoom.activated > 0)
+        winButton.isVisible = (app.currentScene == portalRoom) && (portalRoom.activated > 0)
     }
 
     /**
@@ -741,29 +745,31 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
      */
     override fun actionPerformed(e: ActionEvent?) {
         when (e?.source) {
+            helpButton -> popUp.isVisible = true
+            winButton -> 
             northButton -> app.move('n')
             eastButton -> app.move('e')
             southButton -> app.move('s')
             westButton -> app.move('w')
             verticalButton -> app.move('v')
 
+
+//            in useButtons -> app.useItem(useButtons.indexOf(e!!.source) + 1)
+
             useButton1 -> app.useItem(1)
             useButton2 -> app.useItem(2)
             useButton3 -> app.useItem(3)
             useButton4 -> app.useItem(4)
-            useButton5 -> app.useItem(5)
 
             takeButton1 -> app.takeItem(1)
             takeButton2 -> app.takeItem(2)
             takeButton3 -> app.takeItem(3)
             takeButton4 -> app.takeItem(4)
-            takeButton5 -> app.takeItem(5)
 
             dropButton1 -> app.dropItem(1)
             dropButton2 -> app.dropItem(2)
             dropButton3 -> app.dropItem(3)
             dropButton4 -> app.dropItem(4)
-            dropButton5 -> app.dropItem(5)
         }
         updateView()
     }
@@ -788,6 +794,48 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
 
     override fun keyReleased(e: KeyEvent?) {
 
+    }
+
+}
+
+/**
+ * Popup Dialog Class
+ */
+class PopUpDialog(): JDialog() {
+    /**
+     * Configure the UI
+     */
+    init {
+        configureWindow()
+        addControls()
+        setLocationRelativeTo(null)     // Centre the window
+    }
+
+    /**
+     * Set up the dialog window
+     */
+    private fun configureWindow() {
+        title = "Instructions"
+        contentPane.preferredSize = Dimension(400, 200)
+        isResizable = false
+        isModal = true
+        layout = null
+        pack()
+    }
+
+    /**
+     * Populate the window with controls
+     */
+    private fun addControls() {
+        val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
+
+        // Adding <html> to the label text allows it to wrap
+        val message = JLabel("<html>Welcome to game name. Your goal is to find what lies deep inside this abandoned facility - and try to make it to the 'other side'..." +
+                "You'll have to prioritise what you take as you only have the strength to carry 4 items at once...</html>")
+        message.bounds = Rectangle(25, 25, 350, 150)
+        message.verticalAlignment = SwingConstants.TOP
+        message.font = baseFont
+        add(message)
     }
 
 }
