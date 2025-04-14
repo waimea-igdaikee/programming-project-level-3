@@ -686,11 +686,11 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         useButton3.isEnabled = app.getInventoryItem(3) != null
         useButton4.isEnabled = app.getInventoryItem(4) != null
 
-
-        dropButton1.isEnabled = app.getInventoryItem(1) != null
-        dropButton2.isEnabled = app.getInventoryItem(2) != null
-        dropButton3.isEnabled = app.getInventoryItem(3) != null
-        dropButton4.isEnabled = app.getInventoryItem(4) != null
+        // Can't drop items if the room is full
+        dropButton1.isEnabled = app.getInventoryItem(1) != null  && (app.getSceneItem(4) == null)
+        dropButton2.isEnabled = app.getInventoryItem(2) != null  && (app.getSceneItem(4) == null)
+        dropButton3.isEnabled = app.getInventoryItem(3) != null  && (app.getSceneItem(4) == null)
+        dropButton4.isEnabled = app.getInventoryItem(4) != null  && (app.getSceneItem(4) == null)
 
 
         if (app.currentScene.adjacentScene('n') != null) {
@@ -746,7 +746,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     override fun actionPerformed(e: ActionEvent?) {
         when (e?.source) {
             helpButton -> popUp.isVisible = true
-            winButton -> 
+            winButton ->
             northButton -> app.move('n')
             eastButton -> app.move('e')
             southButton -> app.move('s')

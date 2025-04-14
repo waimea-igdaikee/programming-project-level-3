@@ -9,7 +9,7 @@ This checklist can be used to gauge progress towards different levels of success
 ### Program Functionality
 
 The game functions correctly and meets the specification:
-- [ ] The game is **playable**
+- [x] The game is **playable**
 - [x] The game has a **GUI** with a range of controls
 - [ ] The **instructions** for the game are available via the GUI
 - [x] Player provides game **inputs via the GUI** (e.g. moves, actions)
@@ -17,7 +17,7 @@ The game functions correctly and meets the specification:
 - [x] The game is based on a **non-trivial map**
 - [x] The player can **move between locations**
 - [ ] The player has a **clear purpose** they can attempt to achieve
-- [ ] A **win / end / loss state** is possible
+- [x] A **win / end / loss state** is possible
 
 ### Program Code
 
