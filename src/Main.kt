@@ -98,7 +98,7 @@ class App {
         }
     }
 
-    // Drop the item from the player's iventory into the current scene
+    // Drop the item from the player's inventory into the current scene
     fun dropItem(itemNumber: Int) {
         val item = getInventoryItem(itemNumber)
         if (item != null) {
@@ -587,7 +587,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         add(helpButton)
 
         winButton = JButton("<html>Enter the portal</html>")
-        winButton.bounds = Rectangle(descriptionX,270,descriptionWidth,100)
+        winButton.bounds = Rectangle(descriptionX,270,200,100)
         winButton.horizontalAlignment = SwingConstants.CENTER
         winButton.font = largeFont
         winButton.addActionListener(this)     // Handle any clicks
@@ -806,7 +806,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         takeButton3.isEnabled = app.getSceneItem(3) != null && (app.getInventoryItem(4) == null)
         takeButton4.isEnabled = app.getSceneItem(4) != null && (app.getInventoryItem(4) == null)
 
-        //useButton1.isEnabled = app.getInventoryItem(1) != null
+        useButton1.isEnabled = app.getInventoryItem(1) != null
         useButton2.isEnabled = app.getInventoryItem(2) != null
         useButton3.isEnabled = app.getInventoryItem(3) != null
         useButton4.isEnabled = app.getInventoryItem(4) != null
@@ -915,12 +915,14 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     override fun keyPressed(e: KeyEvent?) {
         println("${e?.keyCode}")
 
-//      Check which key was pressed and act upon it
-        when (e?.keyCode) {
-            37 -> app.move('w')
-            38 -> app.move('n')
-            39 -> app.move('e')
-            40 -> app.move('s')
+//      Check which key was pressed and act upon it - unless the player has won, in which case they can't move
+        if (!app.hasWon()) {
+            when (e?.keyCode) {
+                37 -> app.move('w')
+                38 -> app.move('n')
+                39 -> app.move('e')
+                40 -> app.move('s')
+            }
         }
 
         // Ensure view matched the updated app model data
@@ -956,7 +958,7 @@ class IntroPopUpDialog(): JDialog() {
      */
     private fun configureWindow() {
         title = "Instructions"
-        contentPane.preferredSize = Dimension(400, 200)
+        contentPane.preferredSize = Dimension(500, 270)
         isResizable = false
         isModal = true
         layout = null
@@ -970,9 +972,8 @@ class IntroPopUpDialog(): JDialog() {
         val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
 
         // Adding <html> to the label text allows it to wrap
-        val message = JLabel("<html>Welcome to game name. Your goal is to find what lies deep inside this abandoned facility - and try to make it to the 'other side'..." +
-                "You'll have to prioritise what you take as you only have the strength to carry 4 items at once...</html>")
-        message.bounds = Rectangle(25, 25, 350, 150)
+        val message = JLabel("<html>You find yourself at the entrance of a forgotten facility, long sealed and untouched. Whispers of strange energy drift through its empty halls. Something waits at the heart of it—but what, or why, remains unknown.<br><br>Use the arrow keys or on-screen buttons to move. Click 'Take' to collect items, 'Use' to interact, and 'Drop' to make space. You can only carry four items at once, so plan carefully.<br><br>  Search, decide, and delve deeper. Your task is to discover the truth buried within.</html>")
+        message.bounds = Rectangle(25, 25, 450, 220)
         message.verticalAlignment = SwingConstants.TOP
         message.font = baseFont
         add(message)

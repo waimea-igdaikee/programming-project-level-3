@@ -11,12 +11,12 @@ This checklist can be used to gauge progress towards different levels of success
 The game functions correctly and meets the specification:
 - [x] The game is **playable**
 - [x] The game has a **GUI** with a range of controls
-- [ ] The **instructions** for the game are available via the GUI
+- [x] The **instructions** for the game are available via the GUI
 - [x] Player provides game **inputs via the GUI** (e.g. moves, actions)
 - [x] The **current status** of the game is **shown in the GUI**, updated each player input
 - [x] The game is based on a **non-trivial map**
 - [x] The player can **move between locations**
-- [ ] The player has a **clear purpose** they can attempt to achieve
+- [x] The player has a **clear purpose** they can attempt to achieve
 - [x] A **win / end / loss state** is possible
 
 ### Program Code
@@ -45,13 +45,13 @@ The program code:
 The program has been tested and there is documented evidence that:
 - [ ] The game is **fully functional**, showing testing of:
   - [ ] game setup
-  - [ ] player movement
-  - [ ] other player actions
-  - [ ] scoring (if any)
-  - [ ] player win / lose states
-  - [ ] final feedback (if appropriate)
+  - [x] player movement
+  - [x] other player actions
+  - [x] scoring (if any)
+  - [x] player win / lose states
+  - [x] final feedback (if appropriate)
 - [ ] **Valid (expected) data** has been used to test **all data inputs**
-- [ ] Where tests have failed, **fixes** are discussed and **tests re-run**
+- [x] Where tests have failed, **fixes** are discussed and **tests re-run**
 
 ---
 
@@ -85,7 +85,7 @@ The game GUI:
 ### Program Documentation
 
 The program code is well-commented:
-- [ ] **JavaDoc Block comments** are used at the top of each **file** and **function**
+- [x] **JavaDoc Block comments** are used at the top of each **file** and **function**
 - [ ] Comments accurately describe the **function and behaviour** of the code:
   - [ ] Defining the **purpose** of functions / key blocks of code
   - [ ] Explaining the **reason** (the '**why**') of key parts of the code
@@ -94,9 +94,9 @@ The program code is well-commented:
 ### Program Testing
 
 The program has been tested using:
-- [ ] A test plan **prepared in advance** of the coding
-- [ ] A test plan that **defines test data values** to be used
-- [ ] Test values that cover **boundary** (limit / edge) cases
+- [x] A test plan **prepared in advance** of the coding
+- [x] A test plan that **defines test data values** to be used
+- [x] Test values that cover **boundary** (limit / edge) cases
 
 ---
 
@@ -120,8 +120,8 @@ Program flexibility and maintainability is aided by good program structure:
 ### Game GUI
 
 The game GUI:
-- [ ] Is **well laid out** with care and attention paid to details
-- [ ] Gives a **good user experience (UX)**
+- [x] Is **well laid out** with care and attention paid to details
+- [x] Gives a **good user experience (UX)**
 
 ### Program Documentation
 
@@ -133,5 +133,5 @@ The program code:
 The program has been tested to be **robust**:
 - [ ] With a **comprehensive and thorough** test plan
 - [ ] Testing **regularly** throughput development, allowing **time for debugging**
-- [ ] Using test values that cover **invalid** (unexpected) cases
-- [ ] Resulting in a program that **copes appropriately** with invalid inputs
+- [x] Using test values that cover **invalid** (unexpected) cases
+- [x] Resulting in a program that **copes appropriately** with invalid inputs
