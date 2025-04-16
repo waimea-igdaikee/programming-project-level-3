@@ -80,7 +80,7 @@ The program uses functions appropriately, where:
 ### Game GUI
 
 The game GUI:
-- [ ] Adheres to **common conventions** (e.g. buttons look like buttons, etc.)
+- [x] Adheres to **common conventions** (e.g. buttons look like buttons, etc.)
 
 ### Program Documentation
 

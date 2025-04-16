@@ -15,6 +15,7 @@
 
 import com.formdev.flatlaf.FlatDarkLaf
 import java.awt.*
+import java.awt.Color.blue
 import java.awt.event.*
 import javax.swing.*
 
@@ -280,7 +281,7 @@ class Scene(
             'v' -> {
                 when (verticalConnection) {
                     'u' -> gameMap[Triple(location.first, location.second - 1, location.third)]
-                    'v' -> gameMap[Triple(location.first, location.second + 1, location.third)]
+                    'd' -> gameMap[Triple(location.first, location.second + 1, location.third)]
                     else -> null
                 }
             }
@@ -446,6 +447,10 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
 
 
     // Fields to hold the UI elements
+    private lateinit var sceneBorder: JLabel
+    private lateinit var controlsBorder: JLabel
+    private lateinit var inventoryBorder: JLabel
+
     private lateinit var titleLabel: JLabel
     private lateinit var northButton: JButton
     private lateinit var eastButton: JButton
@@ -508,7 +513,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
      */
     private fun configureWindow() {
         title = "Kotlin Swing GUI Demo"
-        contentPane.preferredSize = Dimension(600, 450)
+        contentPane.preferredSize = Dimension(600, 480)
         defaultCloseOperation = EXIT_ON_CLOSE
         isResizable = false
         layout = null
@@ -539,17 +544,23 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
 
         val itemsX = 380
         val itemsTopY = 80
-        val itemsBottomY = 280
+        val itemsBottomY = 320
         val itemsButtonSize = 30
         val itemsSpacing = 6
 
         val controlsX = 160
-        val controlsY = 250
+        val controlsY = 280
+
+        // Common colours and borders
+        val lightGrey = Color(75, 80, 82)
+
+        val elementBorder = BorderFactory.createLineBorder(lightGrey, 3, true)
 
         /**
          * Set up all the labels and buttons.
          * Some are iterated over to save lines of code.
          */
+
 
         titleLabel = JLabel("Title")
         titleLabel.horizontalAlignment = SwingConstants.CENTER
@@ -562,12 +573,14 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         descriptionLabel.verticalAlignment = SwingConstants.TOP
         descriptionLabel.bounds = Rectangle(descriptionX, descriptionY + 80, descriptionWidth, 150)
         descriptionLabel.font = smallFont
-        descriptionLabel.background = Color(75, 80, 82)
+        // Create hidden empty border for padding
+        descriptionLabel.border = BorderFactory.createLineBorder(lightGrey, 5)
+        descriptionLabel.background = lightGrey
         descriptionLabel.isOpaque = true
         add(descriptionLabel)
 
         helpButton = JButton("?")
-        helpButton.bounds = Rectangle(15, 380,50,50)
+        helpButton.bounds = Rectangle(15, 415,50,50)
         helpButton.font = largeFont
         helpButton.addActionListener(this)     // Handle any clicks
         helpButton.isFocusable = false
@@ -745,6 +758,26 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
             button.isFocusable = false
             add(button)
         }
+
+        // Add borders to groups of related element to streamline the UX
+        sceneBorder = JLabel()
+        sceneBorder.bounds = Rectangle(10,20, 580, 220)
+        sceneBorder.border = elementBorder
+        sceneBorder.isOpaque = true
+        add(sceneBorder)
+
+        controlsBorder = JLabel()
+        controlsBorder.bounds = Rectangle(10,controlsY - 30, 290, 220)
+        controlsBorder.border = elementBorder
+        controlsBorder.isOpaque = true
+        add(controlsBorder)
+
+        inventoryBorder = JLabel()
+        inventoryBorder.bounds = Rectangle(itemsX - 60,controlsY - 30, 270, 220)
+        inventoryBorder.border = elementBorder
+        inventoryBorder.isOpaque = true
+        add(inventoryBorder)
+
     }
 
     /**

@@ -4,6 +4,10 @@ The test results show the actual outcome of the testing, following the [Test Pla
 
 ---
 
+
+![img_2.png](img_2.png)
+
+GOOD EXAMPLE OF FAILED TEST
 ## Example Test Name
 
 Example test description. Example test description.Example test description. Example test description.Example test description. Example test description.
