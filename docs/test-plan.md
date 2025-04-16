@@ -76,7 +76,7 @@ Items and an inventory system are going to be an integral part of my game. I wan
 
 ## Door Unlocking
 
-As a form of progression, my game will doors that need to be unlocked with found keys.
+As a form of progression, my game will have rooms that need to be unlocked with found keys.
 
 ### Test Data To Use
 

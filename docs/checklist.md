@@ -38,7 +38,7 @@ The program structure:
 The program code:
 - [x] Is **indented** correctly
 - [ ] Is **laid-out clearly**
-- [ ] Contains **comments** that help in understanding how it works
+- [x] Contains **comments** that help in understanding how it works
 
 ### Program Testing
 

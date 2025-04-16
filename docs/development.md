@@ -104,6 +104,8 @@ I had a problem where I could activate scenes before they logically could be act
 ---
 
 
+![img_1.png](img_1.png)
+
 ## Date: xx/xx/20xx
 
 Example description and notes. Example description and notes. Example description and notes. Example description and notes. Example description and notes. Example description and notes.

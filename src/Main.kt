@@ -30,18 +30,20 @@ import javax.swing.*
  * stored, plus any application logic functions
  */
 class App {
-    // Constants defining any key values
-
     // Data fields
     var currentScene: Scene = entrance
     val inventory = mutableListOf<Item>()
 
 
-    // Application logic functions
+    /**
+     * Define all the application functions that the game needs
+     */
+
+    // Move the player to the relevant adjacent scene
     fun move(dir: Char) {
-        if (currentScene.adjacentScene(dir)?.locked == 0) {
+        if (currentScene.adjacentScene(dir)?.locked == 0) { // Is the player allowed to go that way?
             when (dir) {
-                // Move to relevant adjacent scene. Nullable as we've surrounded it by a null check
+                // Move the player. Nullable as we've surrounded it by a null check
                 'n' -> currentScene = currentScene.adjacentScene('n')!!
                 'e' -> currentScene = currentScene.adjacentScene('e')!!
                 's' -> currentScene = currentScene.adjacentScene('s')!!
@@ -51,6 +53,7 @@ class App {
         }
     }
 
+    // Return the requested item object if it exists. Used for displaying the scene's items
     fun getSceneItem(itemNumber: Int): Item? {
         return if (currentScene.items.size >= itemNumber) {
             currentScene.items[itemNumber - 1]
@@ -59,6 +62,7 @@ class App {
         }
     }
 
+    // Same as above; return the requested item if it exists, but from the player's inventory instead of the scene.
     fun getInventoryItem(itemNumber: Int): Item? {
         return if (inventory.size >= itemNumber) {
             inventory[itemNumber - 1]
@@ -67,6 +71,7 @@ class App {
         }
     }
 
+    // Move the requested item from the scene to the player's inventory
     fun takeItem(itemNumber: Int) {
         val item = getSceneItem(itemNumber)
         if (item != null) {
@@ -75,19 +80,24 @@ class App {
         }
     }
 
+    // Use the item. What this does depends on what type the item is.
     fun useItem (itemNumber: Int) {
         val item = getInventoryItem(itemNumber)
         when (item?.type) {
-            "Key" -> currentScene.unlockAdjacentRooms(item.id)
+            "Key" -> currentScene.unlockAdjacentRooms(item.id) // If it's a key, try to unlock the relevant room(s)
+            /*
+            If it's a scene activator (this is further explained in the scene class's comments), attempt to activate
+            the current scene. Only remove the item if activate() returns true - meaning the activation was successful.
+             */
             "Activator" -> {
-                if (currentScene.activate(item)) { // if item to be taken
-                    inventory.remove(item)
+                if (currentScene.activate(item)) { // If activation was successful,
+                    inventory.remove(item)         // remove the item from the player's inventory.
                 }
             }
-
         }
     }
 
+    // Drop the item from the player's iventory into the current scene
     fun dropItem(itemNumber: Int) {
         val item = getInventoryItem(itemNumber)
         if (item != null) {
@@ -95,24 +105,28 @@ class App {
             inventory.remove(item)
         }
     }
+
+    // Returns true when the player has met the win condition.
+    fun hasWon(): Boolean {
+        return (currentScene == portalRoom) && (portalRoom.activated > 0)
+    }
 }
 
-
+// Game map that holds all the scenes and their positions.
 val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>()
-
-// Define the map
 
 // Shared hallway description arrays
 val poweredHallwayDescriptions = arrayOf(
     "Faint overhead lights flicker to life, casting long shadows down the narrow hallway."
 )
-
 val unpoweredHallwayDescriptions = arrayOf(
     "The hallway is pitch black, its end swallowed by shadow.",
     "Lights hum to life overhead, revealing smeared handprints on the walls."
 )
 
-// Define the map
+/**
+ * Define the map
+ */
 val entrance = Scene(Triple(1,1,1), "Entrance", arrayOf(
     "The heavy entrance looms ahead, rusted shut and silent."
 ))
@@ -204,14 +218,18 @@ val portalRoom = Scene(Triple(5,3,5), "Portal Chamber", arrayOf(
 
 val portalControlRoom = Scene(Triple(5,3,3), "Portal Controls", arrayOf(
     "An array of levers and buttons stretches across the wall. A dusty screen reads: 'Disabled at master control room'...",
-    "The array lights up. A different message now glows on the screen: 'Insert keycard to continue'...",
+    "The array lights up. A message glows on the screen: 'Insert lockout key to continue'...",
     "The controls hum with power. The screen now displays: 'Portal Online'. The levers click into place, and the air grows tense with anticipation."
 ))
 
 val unpoweredHallways = arrayOf(hallway425, hallway525, hallway625, hallway624, hallway623, hallway423, hallway634, hallway633, hallway635)
 
-// 
 
+/**
+ * Scene class. Of note is the activation system - each scene has up to 3 different activation states. Their description
+ * and/or game logic can differ depending on these states. Relevant scenes have an activator - a specific item class
+ * object that activates said scene and possibly other scenes.
+ */
 
 class Scene(
     val location: Triple<Int, Int, Int>,
@@ -229,17 +247,30 @@ class Scene(
     var currentDescription = descriptions[0]
 
     val items = mutableListOf<Item>()
+
+    /**
+     * Define methods
+     */
+
+    // Maps this scene to its location in the gameMap
+    fun addToMap() {
+        gameMap[location] = this
+    }
+
+    // Same as above but the room spawns locked
+    fun addToMapLocked(keyId: Int) {
+        gameMap[location] = this
+        locked = keyId
+    }
+
+    // Scenes such as stairs or elevators will use this method
     fun enableVerticalConnection(direction: Char) {
         if (direction == 'u' || direction == 'd') {
             verticalConnection = direction
         }
     }
 
-
-    fun addItem(obj: Item) {
-        items.add(obj)
-    }
-
+    // Returns the adjacent scene object in a given direction. Used by multiple other methods.
     fun adjacentScene(direction: Char): Scene? {
         return when (direction) {
             'n' -> gameMap[Triple(location.first, location.second, location.third - 1)]
@@ -249,15 +280,20 @@ class Scene(
             'v' -> {
                 when (verticalConnection) {
                     'u' -> gameMap[Triple(location.first, location.second - 1, location.third)]
-                    else -> gameMap[Triple(location.first, location.second + 1, location.third)]
+                    'v' -> gameMap[Triple(location.first, location.second + 1, location.third)]
+                    else -> null
                 }
             }
             else -> null
         }
     }
 
+    /*
+    When the player attempts to use a key, check all the relevant surrounding rooms to see
+    if that key unlocks any of them.
+     */
     fun unlockAdjacentRooms(keyId: Int) {
-        charArrayOf('n', 'e', 's', 'w').forEach { direction -> // Iterate through, unlocking each adjacent room
+        charArrayOf('n', 'e', 's', 'w').forEach { direction -> // Iterate through, attempting to unlock each adjacent room
             if (adjacentScene(direction) != null ) {
                 if (adjacentScene(direction)!!.locked == keyId) {
                     adjacentScene(direction)!!.locked = 0
@@ -266,25 +302,24 @@ class Scene(
         }
     }
 
-    fun addToMap() {
-        gameMap[location] = this
+    // Adds an item object to this scene
+    fun addItem(obj: Item) {
+        items.add(obj)
     }
 
+    // As detailed in the scene class's block comment, set an item object to be this room's activator
     fun addActivator(activatorItem: Item, scenesToActivate: Array<Scene>) {
         activator = activatorItem
         this.scenesToActivate = scenesToActivate
     }
 
-    // Makes the room locked. KeyID
-    fun addToMapLocked(keyId: Int) {
-        gameMap[location] = this
-        locked = keyId
-    }
-
-    
-
     // Activates the room to progress the game e.g. putting fuel in the generators
     fun activate(attemptActivator: Item): Boolean {
+        /*
+        Check both whether the scene is ready to be activated (e.g. a keycard can't be inserted into a computer if the
+        scene's power is off i.e. activated == 0), and whether the right item is being used. If so, increment this
+        scene's and the relevant other scenes that this room activates' activation states.
+         */
         if (activated == 1 && activator == attemptActivator) {
             (arrayOf(this)+scenesToActivate).forEach {sceneToActivate ->
                 sceneToActivate.activated ++
@@ -297,14 +332,23 @@ class Scene(
     }
 }
 
+/**
+ * Define the class for items. Items spawn within scenes, and can be moved into the player's inventory.
+ */
+
 class Item(val name: String, val spawnLocations: Array<Scene>, val type: String, val id: Int) {
+    // Pick a random scene in spawnLocations and spawn the item in that room.
     fun spawn() {
-        spawnLocations[spawnLocations.indices.random()].addItem(this) // Random location in list
+        spawnLocations[spawnLocations.indices.random()].addItem(this)
     }
 }
 
 
-// Initialise items
+/**
+ * Define item objects
+ */
+
+// Keys
 val facilityKey = Item("Green Keycard", arrayOf(blastDoor), "Key", 1)
 val medBayKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 2)
 val labKey = Item("Orange Keycard", arrayOf(storageRoom526, storageRoom622), "Key", 3)
@@ -320,7 +364,11 @@ fun main() {
     val app = App()         // Create the app model
     MainWindow(app)         // Create and show the UI, using the app model
 
-    // Add scenes
+    /**
+     * Add all the scenes to the game map. Lock or enable a vertical connection for some.
+     */
+
+    // Level 1 (Top level)
     entrance.addToMap()
     hallway112.addToMap()
     blastDoor.addToMap()
@@ -337,6 +385,7 @@ fun main() {
     computerRoom.addToMap()
     serverRoom.addToMap()
 
+    // Level 2
     elevator325.addToMap()
     elevator325.enableVerticalConnection('u')
     hallway425.addToMap()
@@ -353,6 +402,7 @@ fun main() {
     elevator724.enableVerticalConnection('d')
     labRoom.addToMapLocked(3)
 
+    // Level 3 (Bottom level)
     elevator734.addToMap()
     elevator734.enableVerticalConnection('u')
     hallway634.addToMap()
@@ -361,11 +411,17 @@ fun main() {
     portalControlRoom.addToMap()
     portalRoom.addToMapLocked(2)
 
-    // Initialise Items
+    /**
+     * Spawn all the items in their rooms. Make some activators for scenes.
+     * This is further explained in the scene class comments if neccesary.
+     */
+
+    // Scene keys
     facilityKey.spawn()
     medBayKey.spawn()
     labKey.spawn()
 
+    // Activators
     jerryCan.spawn()
     // Using the jerry can in the generator room activates the generator room, control room, and some hallways
     generatorRoom.addActivator(jerryCan, arrayOf(controlRoom) + unpoweredHallways)
@@ -375,8 +431,6 @@ fun main() {
 
     portalKey.spawn()
     portalControlRoom.addActivator(portalKey, arrayOf(portalRoom))
-
-
 }
 
 /**
@@ -386,8 +440,9 @@ fun main() {
  */
 class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
 
-    // Title and instructions popup
-    private lateinit var popUp: PopUpDialog
+    // Popups for title/instructions and winning
+    private lateinit var introPopUp: IntroPopUpDialog
+    private lateinit var winPopUp: WinPopUpDialog
 
 
     // Fields to hold the UI elements
@@ -398,7 +453,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     private lateinit var westButton: JButton
     private lateinit var verticalButton: JButton
     private lateinit var descriptionLabel: JLabel
-    private lateinit var itemsLabel: JLabel
 
     private lateinit var helpButton: JButton
     private lateinit var winButton: JButton
@@ -414,15 +468,21 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     private lateinit var inventoryLabel3: JLabel
     private lateinit var inventoryLabel4: JLabel
 
+    private lateinit var takeLabel: JLabel
+
     private lateinit var takeButton1 : JButton
     private lateinit var takeButton2 : JButton
     private lateinit var takeButton3 : JButton
     private lateinit var takeButton4 : JButton
 
+    private lateinit var useLabel: JLabel
+
     private lateinit var useButton1 : JButton
     private lateinit var useButton2 : JButton
     private lateinit var useButton3 : JButton
     private lateinit var useButton4 : JButton
+
+    private lateinit var dropLabel: JLabel
 
     private lateinit var dropButton1 : JButton
     private lateinit var dropButton2 : JButton
@@ -440,7 +500,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         isVisible = true                // Make it visible
 
         updateView()                    // Initialise the UI
-        popUp.isVisible = true          // Show the title / instructions dialog
+        introPopUp.isVisible = true          // Show the title / instructions dialog
     }
 
     /**
@@ -448,7 +508,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
      */
     private fun configureWindow() {
         title = "Kotlin Swing GUI Demo"
-        contentPane.preferredSize = Dimension(1000, 500)
+        contentPane.preferredSize = Dimension(600, 450)
         defaultCloseOperation = EXIT_ON_CLOSE
         isResizable = false
         layout = null
@@ -462,55 +522,61 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     private fun addControls() {
         this.addKeyListener(this)
 
+        // Set popups
+        introPopUp = IntroPopUpDialog()
+        winPopUp = WinPopUpDialog()
 
-        popUp = PopUpDialog()
-
-        // Define important constants for the controls
-        val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 36)
+        /**
+         * Define important position constants for the controls
+         */
+        val largeFont = Font(Font.SANS_SERIF, Font.PLAIN, 32)
         val smallFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
+        val tinyFont = Font(Font.SANS_SERIF, Font.PLAIN, 12)
 
-        val DESCRIPTION_X = 35
-        val DESCRIPTION_Y = 0
-        val DESCRIPTION_WIDTH = 400
+        val descriptionX = 35
+        val descriptionY = 0
+        val descriptionWidth = 300
 
-        val INVENTORY_X = 600
-        val INVENTORY_Y = 0
-        val INVENTORY_BUTTON_SIZE = 30
-        val INVENTORY_SPACING = 10
+        val itemsX = 380
+        val itemsTopY = 80
+        val itemsBottomY = 280
+        val itemsButtonSize = 30
+        val itemsSpacing = 6
 
-        val BUTTONS_X = 200
-        val BUTTONS_Y = 250
+        val controlsX = 160
+        val controlsY = 250
 
         /**
          * Set up all the labels and buttons.
-         * Some, like the inventory controls, are iterated over to save lines of code.
+         * Some are iterated over to save lines of code.
          */
 
         titleLabel = JLabel("Title")
         titleLabel.horizontalAlignment = SwingConstants.CENTER
-        titleLabel.bounds = Rectangle(DESCRIPTION_X, DESCRIPTION_Y, DESCRIPTION_WIDTH, 100)
-        titleLabel.font = baseFont
+        titleLabel.bounds = Rectangle(0, 0, 600, 100)
+        titleLabel.font = largeFont
         add(titleLabel)
 
         descriptionLabel = JLabel("DESCRIPTION HERE")
         descriptionLabel.horizontalAlignment = SwingConstants.LEFT
         descriptionLabel.verticalAlignment = SwingConstants.TOP
-        descriptionLabel.bounds = Rectangle(DESCRIPTION_X, DESCRIPTION_Y + 80, DESCRIPTION_WIDTH, 120)
+        descriptionLabel.bounds = Rectangle(descriptionX, descriptionY + 80, descriptionWidth, 150)
         descriptionLabel.font = smallFont
         descriptionLabel.background = Color(75, 80, 82)
         descriptionLabel.isOpaque = true
         add(descriptionLabel)
 
         helpButton = JButton("?")
-        helpButton.bounds = Rectangle(600, 0,50,50)
-        helpButton.font = baseFont
+        helpButton.bounds = Rectangle(15, 380,50,50)
+        helpButton.font = largeFont
         helpButton.addActionListener(this)     // Handle any clicks
         helpButton.isFocusable = false
         add(helpButton)
 
-        winButton = JButton("Enter the portal...")
-        winButton.bounds = Rectangle(0, 300,300,50)
-        winButton.font = baseFont
+        winButton = JButton("<html>Enter the portal</html>")
+        winButton.bounds = Rectangle(descriptionX,270,descriptionWidth,100)
+        winButton.horizontalAlignment = SwingConstants.CENTER
+        winButton.font = largeFont
         winButton.addActionListener(this)     // Handle any clicks
         winButton.isFocusable = false
         winButton.isEnabled = false
@@ -521,50 +587,44 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
 
         // Movement buttons
         northButton = JButton("N")
-        northButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y,50,50)
-        northButton.font = baseFont
+        northButton.bounds = Rectangle(controlsX, controlsY,50,50)
+        northButton.font = largeFont
         northButton.addActionListener(this)     // Handle any clicks
         northButton.isFocusable = false
         add(northButton)
 
         eastButton = JButton("E")
-        eastButton.bounds = Rectangle(BUTTONS_X + 60, BUTTONS_Y + 60,50,50)
-        eastButton.font = baseFont
+        eastButton.bounds = Rectangle(controlsX + 60, controlsY + 60,50,50)
+        eastButton.font = largeFont
         eastButton.addActionListener(this)     // Handle any clicks
         eastButton.isFocusable = false
         add(eastButton)
 
         southButton = JButton("S")
-        southButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y + 120,50,50)
-        southButton.font = baseFont
+        southButton.bounds = Rectangle(controlsX, controlsY + 120,50,50)
+        southButton.font = largeFont
         southButton.addActionListener(this)     // Handle any clicks
         southButton.isFocusable = false
         add(southButton)
 
         westButton = JButton("W")
-        westButton.bounds = Rectangle(BUTTONS_X - 60, BUTTONS_Y + 60,50,50)
-        westButton.font = baseFont
+        westButton.bounds = Rectangle(controlsX - 60, controlsY + 60,50,50)
+        westButton.font = largeFont
         westButton.addActionListener(this)     // Handle any clicks
         westButton.isFocusable = false
         add(westButton)
 
         verticalButton = JButton("-")
-        verticalButton.bounds = Rectangle(BUTTONS_X, BUTTONS_Y + 60,50,50)
-        verticalButton.font = baseFont
+        verticalButton.bounds = Rectangle(controlsX, controlsY + 60,50,50)
+        verticalButton.font = largeFont
         verticalButton.addActionListener(this)     // Handle any clicks
         verticalButton.isFocusable = false
         add(verticalButton)
 
-        itemsLabel = JLabel("Items")
-        itemsLabel.horizontalAlignment = SwingConstants.LEFT
-        itemsLabel.bounds = Rectangle(INVENTORY_X, INVENTORY_Y, 200, 100)
-        itemsLabel.font = baseFont
-        add(itemsLabel)
-
         inventoryLabel = JLabel("Inventory")
-        inventoryLabel.horizontalAlignment = SwingConstants.LEFT
-        inventoryLabel.bounds = Rectangle(INVENTORY_X + 200, INVENTORY_Y, 200, 100)
-        inventoryLabel.font = baseFont
+        inventoryLabel.horizontalAlignment = SwingConstants.CENTER
+        inventoryLabel.bounds = Rectangle(itemsX, itemsBottomY - 90, 200, 100)
+        inventoryLabel.font = largeFont
         add(inventoryLabel)
 
         inventoryLabel1 = JLabel("")
@@ -575,10 +635,10 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         inventoryLabels.forEachIndexed { index, label ->
             label.horizontalAlignment = SwingConstants.RIGHT
             label.bounds = Rectangle(
-                INVENTORY_X + 140,
-                100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                itemsX - 60,
+                itemsBottomY + (itemsButtonSize + itemsSpacing) * index,
                 150,
-                INVENTORY_BUTTON_SIZE)
+                itemsButtonSize)
             label.font = smallFont
             add(label)
         }
@@ -591,13 +651,24 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         itemLabels.forEachIndexed { index, label ->
             label.horizontalAlignment = SwingConstants.RIGHT
             label.bounds = Rectangle(
-                INVENTORY_X - 60,
-                100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
+                itemsX - 20,
+                itemsTopY + (itemsButtonSize + itemsSpacing) * index,
                 150,
-                INVENTORY_BUTTON_SIZE)
+                itemsButtonSize)
             label.font = smallFont
             add(label)
         }
+
+        takeLabel = JLabel("Take")
+        takeLabel.horizontalAlignment = SwingConstants.LEFT
+        takeLabel.font = tinyFont
+        takeLabel.bounds = Rectangle(
+            itemsX + 140,
+            itemsTopY - 15,
+            50,
+            10
+        )
+        add(takeLabel)
 
         takeButton1 = JButton("")
         takeButton2 = JButton("")
@@ -606,16 +677,27 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         val takeButtons = arrayOf(takeButton1, takeButton2, takeButton3, takeButton4)
         takeButtons.forEachIndexed { index, button ->
             button.bounds = Rectangle(
-                INVENTORY_X + 100,
-                100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
-                INVENTORY_BUTTON_SIZE,
-                INVENTORY_BUTTON_SIZE
+                itemsX + 140,
+                itemsTopY + (itemsButtonSize + itemsSpacing) * index,
+                itemsButtonSize,
+                itemsButtonSize
             )
             button.font = smallFont
             button.addActionListener(this)
             button.isFocusable = false
             add(button)
         }
+
+        useLabel = JLabel("Use")
+        useLabel.horizontalAlignment = SwingConstants.LEFT
+        useLabel.font = tinyFont
+        useLabel.bounds = Rectangle(
+            itemsX + 104,
+            itemsBottomY - 15,
+            50,
+            10
+        )
+        add(useLabel)
 
         useButton1 = JButton("")
         useButton2 = JButton("")
@@ -624,16 +706,27 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         val useButtons = arrayOf(useButton1, useButton2, useButton3, useButton4)
         useButtons.forEachIndexed { index, button ->
             button.bounds = Rectangle(
-                INVENTORY_X + 300,
-                100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
-                INVENTORY_BUTTON_SIZE,
-                INVENTORY_BUTTON_SIZE
+                itemsX + 100,
+                itemsBottomY + (itemsButtonSize + itemsSpacing) * index,
+                itemsButtonSize,
+                itemsButtonSize
             )
             button.font = smallFont
             button.addActionListener(this)
             button.isFocusable = false
             add(button)
         }
+
+        dropLabel = JLabel("Drop")
+        dropLabel.horizontalAlignment = SwingConstants.LEFT
+        dropLabel.font = tinyFont
+        dropLabel.bounds = Rectangle(
+            itemsX + 140,
+            itemsBottomY - 15,
+            50,
+            10
+        )
+        add(dropLabel)
 
         dropButton1 = JButton("")
         dropButton2 = JButton("")
@@ -642,10 +735,10 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         val dropButtons = arrayOf(dropButton1, dropButton2, dropButton3, dropButton4)
         dropButtons.forEachIndexed { index, button ->
             button.bounds = Rectangle(
-                INVENTORY_X + 350,
-                100 + INVENTORY_Y + (INVENTORY_BUTTON_SIZE + INVENTORY_SPACING) * index,
-                INVENTORY_BUTTON_SIZE,
-                INVENTORY_BUTTON_SIZE
+                itemsX + 140,
+                itemsBottomY + (itemsButtonSize + itemsSpacing) * index,
+                itemsButtonSize,
+                itemsButtonSize
             )
             button.font = smallFont
             button.addActionListener(this)
@@ -654,17 +747,16 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         }
     }
 
-
     /**
-     * Update the UI controls based on the current state
-     * of the application model
+     * Update the UI controls based on the current state of the application model
      */
     fun updateView() {
         requestFocus()
         titleLabel.text = app.currentScene.name
-        descriptionLabel.text = "<html>" + app.currentScene.currentDescription + "</html>" // Wrap in html tags to enable line wrapping
+        descriptionLabel.text = "<html>" + app.currentScene.currentDescription + "</html>" // HTML tags enable line wrapping
 
         // I should probably store all these in an array and then use .forEach()
+        // Update labels and controls for both scene and inventory items
         itemLabel1.text = app.getSceneItem(1)?.name ?: ""
         itemLabel2.text = app.getSceneItem(2)?.name ?: ""
         itemLabel3.text = app.getSceneItem(3)?.name ?: ""
@@ -686,13 +778,17 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         useButton3.isEnabled = app.getInventoryItem(3) != null
         useButton4.isEnabled = app.getInventoryItem(4) != null
 
-        // Can't drop items if the room is full
+        // Disable drop buttons if that inventory slot is empty, or if the room is full.
         dropButton1.isEnabled = app.getInventoryItem(1) != null  && (app.getSceneItem(4) == null)
         dropButton2.isEnabled = app.getInventoryItem(2) != null  && (app.getSceneItem(4) == null)
         dropButton3.isEnabled = app.getInventoryItem(3) != null  && (app.getSceneItem(4) == null)
         dropButton4.isEnabled = app.getInventoryItem(4) != null  && (app.getSceneItem(4) == null)
 
 
+        /*
+        Enable, grey out, or hide directional controls based on whether that adjacent scene in the respective
+        direction is unlocked, locked, or doesn't exist
+         */
         if (app.currentScene.adjacentScene('n') != null) {
             northButton.text = "↑"
         } else {
@@ -719,6 +815,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         southButton.isEnabled = app.currentScene.adjacentScene('s')?.locked == 0
         westButton.isEnabled = app.currentScene.adjacentScene('w')?.locked == 0
 
+        // Make the vertical movement button reflect the vertical direction that player can move in, if at all
         when (app.currentScene.verticalConnection) {
             'u' -> {
                 verticalButton.text = "^"
@@ -734,8 +831,13 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
             }
         }
 
-        winButton.isEnabled = (app.currentScene == portalRoom) && (portalRoom.activated > 0)
-        winButton.isVisible = (app.currentScene == portalRoom) && (portalRoom.activated > 0)
+        /**
+         * If the player wins, replace the directional controls with an "enter the portal" button.
+         */
+        winButton.isEnabled = app.hasWon()
+        winButton.isVisible = app.hasWon()
+
+        arrayOf(northButton, eastButton, southButton, westButton, verticalButton).forEach { it.isVisible = !app.hasWon() }
     }
 
     /**
@@ -745,8 +847,11 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
      */
     override fun actionPerformed(e: ActionEvent?) {
         when (e?.source) {
-            helpButton -> popUp.isVisible = true
-            winButton ->
+            // Show relevant popups if their respective buttons are clicked
+            helpButton -> introPopUp.isVisible = true
+            winButton -> winPopUp.isVisible = true
+
+            //
             northButton -> app.move('n')
             eastButton -> app.move('e')
             southButton -> app.move('s')
@@ -774,9 +879,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         updateView()
     }
 
-    override fun keyTyped(e: KeyEvent?) {
-    }
-
     override fun keyPressed(e: KeyEvent?) {
         println("${e?.keyCode}")
 
@@ -792,16 +894,21 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         updateView()
     }
 
-    override fun keyReleased(e: KeyEvent?) {
+    override fun keyTyped(e: KeyEvent?) {
+        // This function only exists so Kotlin doesn't get upset
+    }
 
+    override fun keyReleased(e: KeyEvent?) {
+        // Same with this one
     }
 
 }
 
 /**
- * Popup Dialog Class
+ * Dialog Classes.
+ * I am using 2 separate classes as they are too many differences between the two for one generic dialog class.
  */
-class PopUpDialog(): JDialog() {
+class IntroPopUpDialog(): JDialog() {
     /**
      * Configure the UI
      */
@@ -832,6 +939,44 @@ class PopUpDialog(): JDialog() {
         // Adding <html> to the label text allows it to wrap
         val message = JLabel("<html>Welcome to game name. Your goal is to find what lies deep inside this abandoned facility - and try to make it to the 'other side'..." +
                 "You'll have to prioritise what you take as you only have the strength to carry 4 items at once...</html>")
+        message.bounds = Rectangle(25, 25, 350, 150)
+        message.verticalAlignment = SwingConstants.TOP
+        message.font = baseFont
+        add(message)
+    }
+
+}
+
+class WinPopUpDialog(): JDialog() {
+    /**
+     * Configure the UI
+     */
+    init {
+        configureWindow()
+        addControls()
+        setLocationRelativeTo(null)     // Centre the window
+    }
+
+    /**
+     * Set up the dialog window
+     */
+    private fun configureWindow() {
+        title = "Win"
+        contentPane.preferredSize = Dimension(400, 200)
+        isResizable = false
+        isModal = true
+        layout = null
+        pack()
+    }
+
+    /**
+     * Populate the window with controls
+     */
+    private fun addControls() {
+        val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
+
+        // Adding <html> to the label text allows it to wrap
+        val message = JLabel("<html>You go through the portal and emerge on the other side. You win!</html>")
         message.bounds = Rectangle(25, 25, 350, 150)
         message.verticalAlignment = SwingConstants.TOP
         message.font = baseFont
