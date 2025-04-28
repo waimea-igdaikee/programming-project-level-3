@@ -21,6 +21,7 @@ Testing the movement system of my game, to make sure players can move where they
 This first test failed before I had even got to testing invalid inputs. The issue is that the vertical movement button didn't actually move me down. I'll have to debug my program to find the source of this issue.
 
 I have found what was causing this issue:
+
 ![movementBug.png](screenshots%2FmovementBug.png)
 
 In the line: `'v' -> gameMap[Triple...`, the 'v' should be a 'd' for 'down'. I must have accidentally written 'v' when refactoring my code. Now that this bug has been addressed, I will retest my code. _Note: from here on in, mouse clicks are shown my a yellow circle around the pointer. This is useful as it's otherwise impossible to tell when I am clicking greyed-out buttons._

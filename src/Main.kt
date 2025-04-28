@@ -33,11 +33,190 @@ class App {
     // Data fields
     var currentScene: Scene = entrance
     val inventory = mutableListOf<Item>()
+    // Game map that holds all the scenes and their positions.
+    val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>()
+    lateinit var unpoweredHallways: List<Scene>
+    lateinit var finalLocation: Scene
 
+    init {
+        setupMap()
+    }
 
     /**
      * Define all the application functions that the game needs
      */
+
+    fun setupMap() {
+        /**
+         * Define item objects
+         */
+
+        // Keys
+        val greenKey = Item("Green Keycard", arrayOf(blastDoor), "Key", 1)
+        val blueKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 2)
+        val orangeKey = Item("Orange Keycard", arrayOf(storageRoom526, storageRoom622), "Key", 3)
+
+        // Activator items
+        val finger = Item("Rotting Finger", arrayOf(medBay), "Activator", 5)
+        val jerryCan = Item("Jerry Can", arrayOf(labRoom), "Activator", 4)
+        val portalKey = Item("Portal Lockout Key", arrayOf(portalControlRoom), "Activator", 6)
+
+
+
+
+        /**
+         * Define the map
+         */
+        val entrance = Scene("Entrance", arrayOf(
+            "The heavy entrance looms ahead, rusted shut and silent."
+        ))
+
+        val hallway112 = Scene(Triple(1,1,2), "Hallway", poweredHallwayDescriptions)
+
+        val blastDoor = Scene(Triple(1,1,3), "Blast Door", arrayOf(
+            "A reinforced blast door blocks the way, scorched and dented from the outside."
+        ))
+
+        val hallway213 = Scene(Triple(2,1,3), "Hallway", poweredHallwayDescriptions, greenKey)
+        val hallway313 = Scene(Triple(3,1,3), "Hallway", poweredHallwayDescriptions)
+        val hallway413 = Scene(Triple(4,1,3), "Hallway", poweredHallwayDescriptions)
+        val hallway114 = Scene(Triple(1,1,4), "Hallway", poweredHallwayDescriptions, greenKey)
+        val hallway115 = Scene(Triple(1,1,5), "Hallway", poweredHallwayDescriptions)
+        val hallway215 = Scene(Triple(2,1,5), "Hallway", poweredHallwayDescriptions)
+
+        val medBay = Scene(Triple(3,1,2), "Medical Bay", arrayOf(
+            "An infirmary soaked in rot. Blood-slick tiles and a mound of limbs fester in the corner."
+        ), blueKey)
+
+        val elevator315 = Scene(Triple(3,1,5), "Elevator", arrayOf(
+            "An untrustworthy elevator at the top, its doors twitching as if barely hanging on."
+        ))
+
+        val messHall = Scene(Triple(4,1,4), "Mess Hall", arrayOf(
+            "An untidy mess hall filled with overturned trays and flickering ceiling lights."
+        ))
+
+        val computerRoom = Scene(Triple(5,1,3), "Computer Room", arrayOf(
+            "Rows of outdated terminals sit in silence. A thick layer of dust clings to every screen."
+        ))
+
+        val serverRoom = Scene(Triple(5,1,2), "Server Room", arrayOf(
+            "Towers of servers buzz quietly in the dark, their fans spinning like anxious whispers."
+        ))
+
+        val elevator325 = Scene(Triple(3,2,5), "Elevator", arrayOf(
+            "The bottom of the shaft. Rust streaks the walls. The elevator car looks ready to drop at any moment."
+        ))
+
+        val hallway425 = Scene(Triple(4,2,5), "Hallway", unpoweredHallwayDescriptions)
+        val hallway525 = Scene(Triple(5,2,5), "Hallway", unpoweredHallwayDescriptions)
+        val hallway625 = Scene(Triple(6,2,5), "Hallway", unpoweredHallwayDescriptions)
+        val hallway624 = Scene(Triple(6,2,4), "Hallway", unpoweredHallwayDescriptions)
+        val hallway623 = Scene(Triple(6,2,3), "Hallway", unpoweredHallwayDescriptions)
+        val hallway423 = Scene(Triple(4,2,3), "Hallway", unpoweredHallwayDescriptions)
+
+        val storageRoom526 = Scene(Triple(5,2,6), "Storage Room", arrayOf(
+            "A damp, reeking storage room cluttered with unmarked crates and oily puddles."
+        ))
+
+        val storageRoom622 = Scene(Triple(6,2,2), "Storage Room", arrayOf(
+            "A foul stench thickens the air. Mold coats crates stacked like forgotten memories."
+        ))
+
+        val controlRoom = Scene(Triple(4,2,4), "Control Room", arrayOf(
+            "A dark room. A massive, ancient computer rests silently in the middle — if only there were a way to bring it back to life...",
+            "The room is bathed in cold light. The massive computer blinks expectantly, awaiting a fingerprint scan...",
+            "The fingerprint is accepted. The computer thrums, and deep below, something mechanical shifts awake..."
+        ))
+
+        val generatorRoom = Scene(Triple(3,2,3), "Generator Room", arrayOf(
+            "An open hall where colossal diesel generators lie dormant, like beasts in slumber.",
+            "An open hall where colossal diesel generators lie dormant, like beasts in slumber.",
+            "The generators roar to life. The walls shake with their pulse as power surges outward."
+        ), null, 1)
+
+        val elevator724 = Scene(Triple(7,2,4), "Elevator", arrayOf(
+            "A sharp ledge overlooks an empty elevator shaft. Frayed wires sway in the void, inviting only the reckless."
+        ))
+
+        val labRoom = Scene(Triple(5,2,3), "Lab Room", arrayOf(
+            "Chemical stains and shattered glass litter this abandoned lab. Jerry cans filled with fuel sit in the corner, waiting."
+        ), orangeKey)
+
+        val elevator734 = Scene(Triple(7,3,4), "Elevator", arrayOf(
+            "At the shaft's bottom, dust and debris blanket the floor. The walls echo with metallic groans above."
+        ))
+
+        val hallway634 = Scene(Triple(6,3,4), "Hallway", unpoweredHallwayDescriptions)
+        val hallway633 = Scene(Triple(6,3,3), "Hallway", unpoweredHallwayDescriptions)
+        val hallway635 = Scene(Triple(6,3,5), "Hallway", unpoweredHallwayDescriptions)
+
+        val portalRoom = Scene(Triple(5,3,5), "Portal Chamber", arrayOf(
+            "The frame of what looks to be a portal towers ahead. It's carved with pulsating runes, but they are dark and lifeless.",
+            "The portal hums to life, its runes glowing brightly. White mist fills the frame, swirling rapidly as if something is about to emerge."
+        ))
+
+        val portalControlRoom = Scene(Triple(5,3,3), "Portal Controls", arrayOf(
+            "An array of levers and buttons stretches across the wall. A dusty screen reads: 'Disabled at master control room'...",
+            "The array lights up. A message glows on the screen: 'Insert lockout key to continue'...",
+            "The controls hum with power. The screen now displays: 'Portal Online'. The levers click into place, and the air grows tense with anticipation."
+        ), blueKey)
+
+        unpoweredHallways = listOf(hallway425, hallway525, hallway625, hallway624, hallway623, hallway423, hallway634, hallway633, hallway635)
+
+        /**
+         * Add all the scenes to the game map. Lock or enable a vertical connection for some.
+         */
+
+        // Level 1 (Top level)
+        gameMap[Triple(1,1,1)] = entrance
+        gameMap[Triple(1,1,2)] = hallway112
+        gameMap[Triple(1,1,3)] = blastDoor
+        gameMap[Triple(2,1,3)] = hallway213
+        gameMap[Triple(3,1,3)] = hallway313
+        gameMap[Triple(4,1,3)] = hallway413
+        gameMap[Triple(1,1,4)] = hallway114
+        hallway114.addToMapLocked(1)
+        gameMap[Triple(1,1,5)] = hallway115
+        gameMap[Triple(2,1,5)] = hallway215
+        gameMap[Triple(3,1,2)] = medBay
+        medBay.addToMapLocked(2)
+        gameMap[Triple(3,1,5)] = elevator315
+        elevator315.enableVerticalConnection('d')
+        gameMap[Triple(4,1,4)] = messHall
+        gameMap[Triple(5,1,3)] = computerRoom
+        gameMap[Triple(5,1,2)] = serverRoom
+
+        // Level 2
+        gameMap[Triple(3,2,5)] = elevator325
+        elevator325.enableVerticalConnection('u')
+        gameMap[Triple(4,2,5)] = hallway425
+        gameMap[Triple(5,2,5)] = hallway525
+        gameMap[Triple(6,2,5)] = hallway625
+        gameMap[Triple(6,2,4)] = hallway624
+        gameMap[Triple(6,2,3)] = hallway623
+        gameMap[Triple(4,2,3)] = hallway423
+        gameMap[Triple(5,2,6)] = storageRoom526
+        gameMap[Triple(6,2,2)] = storageRoom622
+        gameMap[Triple(4,2,4)] = controlRoom
+        gameMap[Triple(3,2,3)] = generatorRoom
+        generatorRoom.addToMapLocked(1)
+        gameMap[Triple(7,2,4)] = elevator724
+        elevator724.enableVerticalConnection('d')
+        gameMap[Triple(5,2,3)] = labRoom
+        labRoom.addToMapLocked(3)
+
+        // Level 3 (Bottom level)
+        gameMap[Triple(7,3,4)] = elevator734
+        elevator734.enableVerticalConnection('u')
+        gameMap[Triple(6,3,4)] = hallway634
+        gameMap[Triple(6,3,3)] = hallway633
+        gameMap[Triple(6,3,5)] = hallway635
+        gameMap[Triple(5,3,3)] = portalControlRoom
+        gameMap[Triple(5,3,5)] = portalRoom
+        portalRoom.addToMapLocked(2)
+
+    }
 
     // Move the player to the relevant adjacent scene
     fun move(dir: Char) {
@@ -50,6 +229,24 @@ class App {
                 'w' -> currentScene = currentScene.adjacentScene('w')!!
                 'v' -> currentScene = currentScene.adjacentScene('v')!!
                 }
+        }
+    }
+
+    // Returns the adjacent scene object in a given direction. Used by multiple other methods.
+    fun adjacentScene(direction: Char): Scene? {
+        return when (direction) {
+            'n' -> gameMap[Triple(location.first, location.second, location.third - 1)]
+            'e' -> gameMap[Triple(location.first + 1, location.second, location.third)]
+            's' -> gameMap[Triple(location.first, location.second, location.third + 1)]
+            'w' -> gameMap[Triple(location.first - 1, location.second, location.third)]
+            'v' -> {
+                when (verticalConnection) {
+                    'u' -> gameMap[Triple(location.first, location.second - 1, location.third)]
+                    'd' -> gameMap[Triple(location.first, location.second + 1, location.third)]
+                    else -> null
+                }
+            }
+            else -> null
         }
     }
 
@@ -112,8 +309,7 @@ class App {
     }
 }
 
-// Game map that holds all the scenes and their positions.
-val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>()
+
 
 // Shared hallway description arrays
 val poweredHallwayDescriptions = arrayOf(
@@ -123,106 +319,6 @@ val unpoweredHallwayDescriptions = arrayOf(
     "The hallway is pitch black, its end swallowed by shadow.",
     "Lights hum to life overhead, revealing smeared handprints on the walls."
 )
-
-/**
- * Define the map
- */
-val entrance = Scene(Triple(1,1,1), "Entrance", arrayOf(
-    "The heavy entrance looms ahead, rusted shut and silent."
-))
-
-val hallway112 = Scene(Triple(1,1,2), "Hallway", poweredHallwayDescriptions)
-
-val blastDoor = Scene(Triple(1,1,3), "Blast Door", arrayOf(
-    "A reinforced blast door blocks the way, scorched and dented from the outside."
-))
-
-val hallway213 = Scene(Triple(2,1,3), "Hallway", poweredHallwayDescriptions)
-val hallway313 = Scene(Triple(3,1,3), "Hallway", poweredHallwayDescriptions)
-val hallway413 = Scene(Triple(4,1,3), "Hallway", poweredHallwayDescriptions)
-val hallway114 = Scene(Triple(1,1,4), "Hallway", poweredHallwayDescriptions)
-val hallway115 = Scene(Triple(1,1,5), "Hallway", poweredHallwayDescriptions)
-val hallway215 = Scene(Triple(2,1,5), "Hallway", poweredHallwayDescriptions)
-
-val medBay = Scene(Triple(3,1,2), "Medical Bay", arrayOf(
-    "An infirmary soaked in rot. Blood-slick tiles and a mound of limbs fester in the corner."
-))
-
-val elevator315 = Scene(Triple(3,1,5), "Elevator", arrayOf(
-    "An untrustworthy elevator at the top, its doors twitching as if barely hanging on."
-))
-
-val messHall = Scene(Triple(4,1,4), "Mess Hall", arrayOf(
-    "An untidy mess hall filled with overturned trays and flickering ceiling lights."
-))
-
-val computerRoom = Scene(Triple(5,1,3), "Computer Room", arrayOf(
-    "Rows of outdated terminals sit in silence. A thick layer of dust clings to every screen."
-))
-
-val serverRoom = Scene(Triple(5,1,2), "Server Room", arrayOf(
-    "Towers of servers buzz quietly in the dark, their fans spinning like anxious whispers."
-))
-
-val elevator325 = Scene(Triple(3,2,5), "Elevator", arrayOf(
-    "The bottom of the shaft. Rust streaks the walls. The elevator car looks ready to drop at any moment."
-))
-
-val hallway425 = Scene(Triple(4,2,5), "Hallway", unpoweredHallwayDescriptions)
-val hallway525 = Scene(Triple(5,2,5), "Hallway", unpoweredHallwayDescriptions)
-val hallway625 = Scene(Triple(6,2,5), "Hallway", unpoweredHallwayDescriptions)
-val hallway624 = Scene(Triple(6,2,4), "Hallway", unpoweredHallwayDescriptions)
-val hallway623 = Scene(Triple(6,2,3), "Hallway", unpoweredHallwayDescriptions)
-val hallway423 = Scene(Triple(4,2,3), "Hallway", unpoweredHallwayDescriptions)
-
-val storageRoom526 = Scene(Triple(5,2,6), "Storage Room", arrayOf(
-    "A damp, reeking storage room cluttered with unmarked crates and oily puddles."
-))
-
-val storageRoom622 = Scene(Triple(6,2,2), "Storage Room", arrayOf(
-    "A foul stench thickens the air. Mold coats crates stacked like forgotten memories."
-))
-
-val controlRoom = Scene(Triple(4,2,4), "Control Room", arrayOf(
-    "A dark room. A massive, ancient computer rests silently in the middle — if only there were a way to bring it back to life...",
-    "The room is bathed in cold light. The massive computer blinks expectantly, awaiting a fingerprint scan...",
-    "The fingerprint is accepted. The computer thrums, and deep below, something mechanical shifts awake..."
-))
-
-val generatorRoom = Scene(Triple(3,2,3), "Generator Room", arrayOf(
-    "An open hall where colossal diesel generators lie dormant, like beasts in slumber.",
-    "An open hall where colossal diesel generators lie dormant, like beasts in slumber.",
-    "The generators roar to life. The walls shake with their pulse as power surges outward."
-), 1)
-
-val elevator724 = Scene(Triple(7,2,4), "Elevator", arrayOf(
-    "A sharp ledge overlooks an empty elevator shaft. Frayed wires sway in the void, inviting only the reckless."
-))
-
-val labRoom = Scene(Triple(5,2,3), "Lab Room", arrayOf(
-    "Chemical stains and shattered glass litter this abandoned lab. Jerry cans filled with fuel sit in the corner, waiting."
-))
-
-val elevator734 = Scene(Triple(7,3,4), "Elevator", arrayOf(
-    "At the shaft's bottom, dust and debris blanket the floor. The walls echo with metallic groans above."
-))
-
-val hallway634 = Scene(Triple(6,3,4), "Hallway", unpoweredHallwayDescriptions)
-val hallway633 = Scene(Triple(6,3,3), "Hallway", unpoweredHallwayDescriptions)
-val hallway635 = Scene(Triple(6,3,5), "Hallway", unpoweredHallwayDescriptions)
-
-val portalRoom = Scene(Triple(5,3,5), "Portal Chamber", arrayOf(
-    "The frame of what looks to be a portal towers ahead. It's carved with pulsating runes, but they are dark and lifeless.",
-    "The portal hums to life, its runes glowing brightly. White mist fills the frame, swirling rapidly as if something is about to emerge."
-))
-
-val portalControlRoom = Scene(Triple(5,3,3), "Portal Controls", arrayOf(
-    "An array of levers and buttons stretches across the wall. A dusty screen reads: 'Disabled at master control room'...",
-    "The array lights up. A message glows on the screen: 'Insert lockout key to continue'...",
-    "The controls hum with power. The screen now displays: 'Portal Online'. The levers click into place, and the air grows tense with anticipation."
-))
-
-val unpoweredHallways = arrayOf(hallway425, hallway525, hallway625, hallway624, hallway623, hallway423, hallway634, hallway633, hallway635)
 
 
 /**
@@ -235,10 +331,10 @@ class Scene(
     val location: Triple<Int, Int, Int>,
     val name: String,
     val descriptions: Array<String>,
+    var key: Item? = null,
     var activated: Int = 0
 ) {
     var verticalConnection = 'n'
-    var locked = 0
 
     var activator: Item? = null
 
@@ -252,17 +348,6 @@ class Scene(
      * Define methods
      */
 
-    // Maps this scene to its location in the gameMap
-    fun addToMap() {
-        gameMap[location] = this
-    }
-
-    // Same as above but the room spawns locked
-    fun addToMapLocked(keyId: Int) {
-        gameMap[location] = this
-        locked = keyId
-    }
-
     // Scenes such as stairs or elevators will use this method
     fun enableVerticalConnection(direction: Char) {
         if (direction == 'u' || direction == 'd') {
@@ -270,23 +355,6 @@ class Scene(
         }
     }
 
-    // Returns the adjacent scene object in a given direction. Used by multiple other methods.
-    fun adjacentScene(direction: Char): Scene? {
-        return when (direction) {
-            'n' -> gameMap[Triple(location.first, location.second, location.third - 1)]
-            'e' -> gameMap[Triple(location.first + 1, location.second, location.third)]
-            's' -> gameMap[Triple(location.first, location.second, location.third + 1)]
-            'w' -> gameMap[Triple(location.first - 1, location.second, location.third)]
-            'v' -> {
-                when (verticalConnection) {
-                    'u' -> gameMap[Triple(location.first, location.second - 1, location.third)]
-                    'd' -> gameMap[Triple(location.first, location.second + 1, location.third)]
-                    else -> null
-                }
-            }
-            else -> null
-        }
-    }
 
     /*
     When the player attempts to use a key, check all the relevant surrounding rooms to see
@@ -344,72 +412,12 @@ class Item(val name: String, val spawnLocations: Array<Scene>, val type: String,
 }
 
 
-/**
- * Define item objects
- */
-
-// Keys
-val facilityKey = Item("Green Keycard", arrayOf(blastDoor), "Key", 1)
-val medBayKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 2)
-val labKey = Item("Orange Keycard", arrayOf(storageRoom526, storageRoom622), "Key", 3)
-
-// Activator items
-val finger = Item("Rotting Finger", arrayOf(medBay), "Activator", 5)
-val jerryCan = Item("Jerry Can", arrayOf(labRoom), "Activator", 4)
-val portalKey = Item("Portal Lockout Key", arrayOf(portalControlRoom), "Activator", 6)
-
-
 fun main() {
     FlatDarkLaf.setup()     // Flat, dark look-and-feel
     val app = App()         // Create the app model
     MainWindow(app)         // Create and show the UI, using the app model
 
-    /**
-     * Add all the scenes to the game map. Lock or enable a vertical connection for some.
-     */
 
-    // Level 1 (Top level)
-    entrance.addToMap()
-    hallway112.addToMap()
-    blastDoor.addToMap()
-    hallway213.addToMapLocked(1)
-    hallway313.addToMap()
-    hallway413.addToMap()
-    hallway114.addToMapLocked(1)
-    hallway115.addToMap()
-    hallway215.addToMap()
-    medBay.addToMapLocked(2)
-    elevator315.addToMap()
-    elevator315.enableVerticalConnection('d')
-    messHall.addToMap()
-    computerRoom.addToMap()
-    serverRoom.addToMap()
-
-    // Level 2
-    elevator325.addToMap()
-    elevator325.enableVerticalConnection('u')
-    hallway425.addToMap()
-    hallway525.addToMap()
-    hallway625.addToMap()
-    hallway624.addToMap()
-    hallway623.addToMap()
-    hallway423.addToMap()
-    storageRoom526.addToMap()
-    storageRoom622.addToMap()
-    controlRoom.addToMap()
-    generatorRoom.addToMap()
-    elevator724.addToMap()
-    elevator724.enableVerticalConnection('d')
-    labRoom.addToMapLocked(3)
-
-    // Level 3 (Bottom level)
-    elevator734.addToMap()
-    elevator734.enableVerticalConnection('u')
-    hallway634.addToMap()
-    hallway633.addToMap()
-    hallway635.addToMap()
-    portalControlRoom.addToMap()
-    portalRoom.addToMapLocked(2)
 
     /**
      * Spawn all the items in their rooms. Make some activators for scenes.
@@ -913,8 +921,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     }
 
     override fun keyPressed(e: KeyEvent?) {
-        println("${e?.keyCode}")
-
 //      Check which key was pressed and act upon it - unless the player has won, in which case they can't move
         if (!app.hasWon()) {
             when (e?.keyCode) {
