@@ -64,7 +64,7 @@ The program stores data using variables, where:
 - [x] Variable names **begin with lowercase**
 - [x] Naming is consistent, either **camelCase or snake_case**
 - [ ] Variables are **scoped appropriately** (global or local to a function)
-- [ ] **Global** variables are only used if **genuinely needed**
+- [x] **Global** variables are only used if **genuinely needed**
 
 The program uses OOP classes and objects appropriately, where:
 - [x] OOP class **names are well-chosen**, relating to their functionality
@@ -114,8 +114,8 @@ Program flexibility and maintainability is aided by good program structure:
 - [ ] Procedures are **efficient** (minimal iterations, etc.)
 - [ ] **Minimal duplication of code** (instead using loops, or having multiple calls to a single function)
 - [x] OOP classes are **well-chosen and logical**, with a clearly defined purpose
-- [ ] Functions are **well-chosen and logical**, with a clearly defined purpose
-- [ ] The classes and functions chosen represent a **logical decomposition** of the task
+- [x] Functions are **well-chosen and logical**, with a clearly defined purpose
+- [x] The classes and functions chosen represent a **logical decomposition** of the task
 
 ### Game GUI
 
@@ -126,12 +126,19 @@ The game GUI:
 ### Program Documentation
 
 The program code:
-- [ ] Code is laid-out and organised **logically and concisely**
+- [x] Code is laid-out and organised **logically and concisely**
 
 ### Program Testing
 
 The program has been tested to be **robust**:
 - [ ] With a **comprehensive and thorough** test plan
-- [ ] Testing **regularly** throughput development, allowing **time for debugging**
+- [ ] Testing **regularly** throughout development, allowing **time for debugging**
 - [x] Using test values that cover **invalid** (unexpected) cases
 - [x] Resulting in a program that **copes appropriately** with invalid inputs
+
+[//]: # (Things to ask Mr Copley:
+- Do I need to go through and privatise any variables I can
+- How much evidence of testing reguarly throughout development is needed - I have some but only from the start
+- How strict is the 'minimal duplication of code' - I tried to minimise it but was only successful in some places
+- Why am I having the initialisation problem...
+)
