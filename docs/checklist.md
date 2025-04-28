@@ -37,7 +37,7 @@ The program structure:
 
 The program code:
 - [x] Is **indented** correctly
-- [ ] Is **laid-out clearly**
+- [x] Is **laid-out clearly**
 - [x] Contains **comments** that help in understanding how it works
 
 ### Program Testing
@@ -50,7 +50,7 @@ The program has been tested and there is documented evidence that:
   - [x] scoring (if any)
   - [x] player win / lose states
   - [x] final feedback (if appropriate)
-- [ ] **Valid (expected) data** has been used to test **all data inputs**
+- [x] **Valid (expected) data** has been used to test **all data inputs**
 - [x] Where tests have failed, **fixes** are discussed and **tests re-run**
 
 ---

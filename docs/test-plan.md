@@ -111,3 +111,15 @@ Upon entering the portal room, if the player:
 
 ---
 
+## Game setup
+
+On starting the game, some of the keycards should have randomised spawn locations.
+While this isn't really a conventional test as I'm not providing valid or invalid inputs, this function of the game does still need to be tested to ensure everything is working correctly.
+
+### Test Data To Use
+
+Initialise the game multiple times and see if the blue keycard changes its spawn location
+
+### Expected Test Result
+
+Approximately half of the time, the blue keycard should spawn in the mess, and the other half of the time it should spawn in the server room.

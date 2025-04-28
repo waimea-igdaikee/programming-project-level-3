@@ -128,6 +128,24 @@ In order, I will try:
 
 ![winState.gif](screenshots%2FwinState.gif)
 
-The above gif shows that the win state works as intended - the button only appears once the portal has been activated. Technically, this passes the test - but whilst this _was_ the expected result, the 'enter the portal' button is in the wrong position in the GUI, and the actual pop-up message seems rather unenthusiastic. So, I am happy that this passes the test, I am going to change the button's UI position and the popup dialog's mesasage.
+The above gif shows that the win state works as intended - the button only appears once the portal has been activated. Technically, this passes the test - but whilst this _was_ the expected result, the 'enter the portal' button is in the wrong position in the GUI, and the actual pop-up message seems rather unenthusiastic. So, while I am happy that this passes the test, I am going to change the button's UI position and the popup dialog's mesasage.
+
+I have changed the 'enter the portal' button to be positioned properly:
+
+![img_3.png](screenshots/betterWinButton.png)
+
+---
+
+## Game setup
+
+On starting the game, some of the keycards should have randomised spawn locations.
+While this isn't really a conventional test as I'm not providing valid or invalid inputs, this function of the game does still need to be tested to ensure everything is working correctly.
+
+### Test Data To Use
+
+I will initialise the game multiple times and see if the blue keycard changes its spawn location.
+
+### Test Result
+
 
 ---

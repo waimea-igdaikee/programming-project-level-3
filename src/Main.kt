@@ -15,7 +15,6 @@
 
 import com.formdev.flatlaf.FlatDarkLaf
 import java.awt.*
-import java.awt.Color.blue
 import java.awt.event.*
 import javax.swing.*
 
@@ -201,7 +200,7 @@ val elevator724 = Scene(Triple(7,2,4), "Elevator", arrayOf(
 ))
 
 val labRoom = Scene(Triple(5,2,3), "Lab Room", arrayOf(
-    "Chemical stains and shattered glass litter this abandoned lab. Jerry cans filled with volatile liquid sit in the corner, waiting."
+    "Chemical stains and shattered glass litter this abandoned lab. Jerry cans filled with fuel sit in the corner, waiting."
 ))
 
 val elevator734 = Scene(Triple(7,3,4), "Elevator", arrayOf(
@@ -446,22 +445,27 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     private lateinit var winPopUp: WinPopUpDialog
 
 
-    // Fields to hold the UI elements
+    /**
+     * Fields to hold all the UI elements
+     */
+    // Borders
     private lateinit var sceneBorder: JLabel
     private lateinit var controlsBorder: JLabel
     private lateinit var inventoryBorder: JLabel
 
     private lateinit var titleLabel: JLabel
+    private lateinit var descriptionLabel: JLabel
+
+    // Lower left quadrant buttons
     private lateinit var northButton: JButton
     private lateinit var eastButton: JButton
     private lateinit var southButton: JButton
     private lateinit var westButton: JButton
     private lateinit var verticalButton: JButton
-    private lateinit var descriptionLabel: JLabel
-
     private lateinit var helpButton: JButton
     private lateinit var winButton: JButton
 
+    // Item and inventory labels and buttons
     private lateinit var itemLabel1: JLabel
     private lateinit var itemLabel2: JLabel
     private lateinit var itemLabel3: JLabel
@@ -474,21 +478,18 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     private lateinit var inventoryLabel4: JLabel
 
     private lateinit var takeLabel: JLabel
-
     private lateinit var takeButton1 : JButton
     private lateinit var takeButton2 : JButton
     private lateinit var takeButton3 : JButton
     private lateinit var takeButton4 : JButton
 
     private lateinit var useLabel: JLabel
-
     private lateinit var useButton1 : JButton
     private lateinit var useButton2 : JButton
     private lateinit var useButton3 : JButton
     private lateinit var useButton4 : JButton
 
     private lateinit var dropLabel: JLabel
-
     private lateinit var dropButton1 : JButton
     private lateinit var dropButton2 : JButton
     private lateinit var dropButton3 : JButton
@@ -505,7 +506,8 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         isVisible = true                // Make it visible
 
         updateView()                    // Initialise the UI
-        introPopUp.isVisible = true          // Show the title / instructions dialog
+
+        introPopUp.isVisible = true     // Show the title / instructions dialog
     }
 
     /**
@@ -532,7 +534,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         winPopUp = WinPopUpDialog()
 
         /**
-         * Define important position constants for the controls
+         * Define important position constants for the labels and controls
          */
         val largeFont = Font(Font.SANS_SERIF, Font.PLAIN, 32)
         val smallFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
@@ -587,7 +589,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         add(helpButton)
 
         winButton = JButton("<html>Enter the portal</html>")
-        winButton.bounds = Rectangle(descriptionX,270,200,100)
+        winButton.bounds = Rectangle(descriptionX,270,220,100)
         winButton.horizontalAlignment = SwingConstants.CENTER
         winButton.font = largeFont
         winButton.addActionListener(this)     // Handle any clicks
@@ -634,6 +636,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         verticalButton.isFocusable = false
         add(verticalButton)
 
+        // Inventory and item labels
         inventoryLabel = JLabel("Inventory")
         inventoryLabel.horizontalAlignment = SwingConstants.CENTER
         inventoryLabel.bounds = Rectangle(itemsX, itemsBottomY - 90, 200, 100)
@@ -683,6 +686,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         )
         add(takeLabel)
 
+        // Inventory buttons
         takeButton1 = JButton("")
         takeButton2 = JButton("")
         takeButton3 = JButton("")
@@ -788,7 +792,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         titleLabel.text = app.currentScene.name
         descriptionLabel.text = "<html>" + app.currentScene.currentDescription + "</html>" // HTML tags enable line wrapping
 
-        // I should probably store all these in an array and then use .forEach()
         // Update labels and controls for both scene and inventory items
         itemLabel1.text = app.getSceneItem(1)?.name ?: ""
         itemLabel2.text = app.getSceneItem(2)?.name ?: ""
@@ -800,7 +803,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         inventoryLabel3.text = app.getInventoryItem(3)?.name ?: ""
         inventoryLabel4.text = app.getInventoryItem(4)?.name ?: ""
 
-        // Enable and disable item buttons where applicable
+        // Enable and disable controls where applicable
         takeButton1.isEnabled = (app.getSceneItem(1) != null) && (app.getInventoryItem(4) == null)
         takeButton2.isEnabled = app.getSceneItem(2) != null && (app.getInventoryItem(4) == null)
         takeButton3.isEnabled = app.getSceneItem(3) != null && (app.getInventoryItem(4) == null)
@@ -891,9 +894,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
             westButton -> app.move('w')
             verticalButton -> app.move('v')
 
-
-//            in useButtons -> app.useItem(useButtons.indexOf(e!!.source) + 1)
-
             useButton1 -> app.useItem(1)
             useButton2 -> app.useItem(2)
             useButton3 -> app.useItem(3)
@@ -934,7 +934,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
     }
 
     override fun keyReleased(e: KeyEvent?) {
-        // Same with this one
+        // This function only exists so Kotlin doesn't get upset
     }
 
 }
@@ -958,7 +958,7 @@ class IntroPopUpDialog(): JDialog() {
      */
     private fun configureWindow() {
         title = "Instructions"
-        contentPane.preferredSize = Dimension(500, 270)
+        contentPane.preferredSize = Dimension(500, 300)
         isResizable = false
         isModal = true
         layout = null
@@ -973,7 +973,7 @@ class IntroPopUpDialog(): JDialog() {
 
         // Adding <html> to the label text allows it to wrap
         val message = JLabel("<html>You find yourself at the entrance of a forgotten facility, long sealed and untouched. Whispers of strange energy drift through its empty halls. Something waits at the heart of it—but what, or why, remains unknown.<br><br>Use the arrow keys or on-screen buttons to move. Click 'Take' to collect items, 'Use' to interact, and 'Drop' to make space. You can only carry four items at once, so plan carefully.<br><br>  Search, decide, and delve deeper. Your task is to discover the truth buried within.</html>")
-        message.bounds = Rectangle(25, 25, 450, 220)
+        message.bounds = Rectangle(25, 25, 450, 270)
         message.verticalAlignment = SwingConstants.TOP
         message.font = baseFont
         add(message)
