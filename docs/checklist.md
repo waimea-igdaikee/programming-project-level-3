@@ -43,8 +43,8 @@ The program code:
 ### Program Testing
 
 The program has been tested and there is documented evidence that:
-- [ ] The game is **fully functional**, showing testing of:
-  - [ ] game setup
+- [x] The game is **fully functional**, showing testing of:
+  - [x] game setup
   - [x] player movement
   - [x] other player actions
   - [x] scoring (if any)
@@ -63,7 +63,7 @@ The program stores data using variables, where:
 - [x] Variable **names are well-chosen** (relating to their purpose)
 - [x] Variable names **begin with lowercase**
 - [x] Naming is consistent, either **camelCase or snake_case**
-- [ ] Variables are **scoped appropriately** (global or local to a function)
+- [x] Variables are **scoped appropriately** (global or local to a function)
 - [x] **Global** variables are only used if **genuinely needed**
 
 The program uses OOP classes and objects appropriately, where:
@@ -107,7 +107,7 @@ The program has been tested using:
 Program flexibility and maintainability is aided by:
 - [x] **Constants** being used to define key values, and used throughout the program
 - [x] Variable values being **derived at run-time** (from other variables / constants)
-- [ ] Literal values only being used if they **make sense**, and they don't impact program flexibility
+- [x] Literal values only being used if they **make sense**, and they don't impact program flexibility
 
 Program flexibility and maintainability is aided by good program structure:
 - [x] Conditions, branching, loops and functions are used **effectively**
@@ -131,14 +131,7 @@ The program code:
 ### Program Testing
 
 The program has been tested to be **robust**:
-- [ ] With a **comprehensive and thorough** test plan
+- [x] With a **comprehensive and thorough** test plan
 - [x] Testing **regularly** throughout development, allowing **time for debugging**
 - [x] Using test values that cover **invalid** (unexpected) cases
 - [x] Resulting in a program that **copes appropriately** with invalid inputs
-
-[//]: # (Things to ask Mr Copley:
-- Do I need to go through and privatise any variables I can
-- How much evidence of testing reguarly throughout development is needed - I have some but only from the start
-- How strict is the 'minimal duplication of code' - I tried to minimise it but was only successful in some places
-- Why am I having the initialisation problem...
-)

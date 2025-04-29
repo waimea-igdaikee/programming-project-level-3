@@ -17,6 +17,7 @@ Testing the movement system of my game, to make sure players can move where they
 ### Test Data To Use
 
 - Valid inputs (moving left when there is an unlocked room to the left, down when there is an unlocked room below, etc)
+- Boundary inputs (testing that _all_ areas of the map can be moved to, including the far end of the map and all scenes with literal 'boundaries' (walls))
 - Invalid inputs:
   - Trying to move into a room that does exist, but is locked
   - Trying to move somewhere that doesn't exist, e.g. off the map or into a wall.

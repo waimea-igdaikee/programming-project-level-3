@@ -11,11 +11,14 @@ Testing the movement system of my game, to make sure players can move where they
 ### Test Data Used
 
 - Valid inputs (moving left when there is an unlocked room to the left, down when there is an unlocked room below, etc)
+- Boundary inputs. I will navigate through all areas of the map including the far ends of the map and all scenes with literal 'boundaries' (walls).
 - Invalid inputs:
     - Trying to move into a room that does exist, but is locked
-    - Trying to move somewhere that doesn't exist, e.g. off the map or into a wall.
+    - Trying to move somewhere that doesn't exist, e.g. off the map or into a wall.T
 
-### Test Result 1
+I will run 2 tests - test 1 will check that valid and invalid inputs are correctly handled, and test 2 will check that all scenes in the map can be reached, including the far ends of the map and any bounded scenes.
+
+### Test 1 Result 1
 ![failedMovement.gif](screenshots%2FfailedMovement.gif)
 
 This first test failed before I had even got to testing invalid inputs. The issue is that the vertical movement button didn't actually move me down. I'll have to debug my program to find the source of this issue.
@@ -26,12 +29,17 @@ I have found what was causing this issue:
 
 In the line: `'v' -> gameMap[Triple...`, the 'v' should be a 'd' for 'down'. I must have accidentally written 'v' when refactoring my code. Now that this bug has been addressed, I will retest my code. _Note: from here on in, mouse clicks are shown my a yellow circle around the pointer. This is useful as it's otherwise impossible to tell when I am clicking greyed-out buttons._
 
-### Test Result 2
+### Test 1 Result 2
 
 ![movementWorking.gif](screenshots%2FmovementWorking.gif)
 
 We can see here that movement works as intended; we move where intended for valid inputs, and the game doesn't let us move into a room that is locked or doesn't exist.
 
+### Test 2 Result
+
+![movementBoundaries.gif](images%2FmovementBoundaries.gif)
+
+The above gif shows that all my rooms are able to be entered, including those at the far ends of the map and those bounded by walls.
 
 ---
 
