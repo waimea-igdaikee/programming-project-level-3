@@ -106,13 +106,13 @@ The program has been tested using:
 
 Program flexibility and maintainability is aided by:
 - [x] **Constants** being used to define key values, and used throughout the program
-- [ ] Variable values being **derived at run-time** (from other variables / constants)
+- [x] Variable values being **derived at run-time** (from other variables / constants)
 - [ ] Literal values only being used if they **make sense**, and they don't impact program flexibility
 
 Program flexibility and maintainability is aided by good program structure:
-- [ ] Conditions, branching, loops and functions are used **effectively**
-- [ ] Procedures are **efficient** (minimal iterations, etc.)
-- [ ] **Minimal duplication of code** (instead using loops, or having multiple calls to a single function)
+- [x] Conditions, branching, loops and functions are used **effectively**
+- [x] Procedures are **efficient** (minimal iterations, etc.)
+- [x] **Minimal duplication of code** (instead using loops, or having multiple calls to a single function)
 - [x] OOP classes are **well-chosen and logical**, with a clearly defined purpose
 - [x] Functions are **well-chosen and logical**, with a clearly defined purpose
 - [x] The classes and functions chosen represent a **logical decomposition** of the task
@@ -132,7 +132,7 @@ The program code:
 
 The program has been tested to be **robust**:
 - [ ] With a **comprehensive and thorough** test plan
-- [ ] Testing **regularly** throughout development, allowing **time for debugging**
+- [x] Testing **regularly** throughout development, allowing **time for debugging**
 - [x] Using test values that cover **invalid** (unexpected) cases
 - [x] Resulting in a program that **copes appropriately** with invalid inputs
 
