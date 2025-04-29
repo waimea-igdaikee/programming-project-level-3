@@ -31,13 +31,13 @@ import javax.swing.*
  */
 class App {
     // Data fields
-    lateinit var currentCoords: Triple<Int, Int, Int>
+    var currentCoords = Triple(1,1,1) // The coordinates of the scene the player should spawn in
     lateinit var currentScene: Scene
     val inventory = mutableListOf<Item>()
     // Game map that holds all the scenes and their positions.
     val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>()
     lateinit var unpoweredHallways: List<Scene>
-    lateinit var finalLocation: Scene
+    lateinit var winScene: Scene
 
     init {
         setupMap()
@@ -53,14 +53,14 @@ class App {
          */
 
         // Keys
-        val greenKey = Item("Green Keycard", arrayOf(blastDoor), "Key", 1)
-        val blueKey = Item("Blue Keycard", arrayOf(messHall, serverRoom), "Key", 2)
-        val orangeKey = Item("Orange Keycard", arrayOf(storageRoom526, storageRoom622), "Key", 3)
+        val greenKey = Item("Green Keycard", "Key")
+        val blueKey = Item("Blue Keycard", "Key")
+        val orangeKey = Item("Orange Keycard", "Key")
 
         // Activator items
-        val finger = Item("Rotting Finger", arrayOf(medBay), "Activator", 5)
-        val jerryCan = Item("Jerry Can", arrayOf(labRoom), "Activator", 4)
-        val portalKey = Item("Portal Lockout Key", arrayOf(portalControlRoom), "Activator", 6)
+        val finger = Item("Rotting Finger", "Activator")
+        val jerryCan = Item("Jerry Can", "Activator")
+        val portalKey = Item("Portal Lockout Key","Activator")
 
 
         /**
@@ -193,7 +193,7 @@ class App {
         val portalRoom = Scene(
             "Portal Chamber", arrayOf(
                 "The frame of what looks to be a portal towers ahead. It's carved with pulsating runes, but they are dark and lifeless.",
-                "The portal hums to life, its runes glowing brightly. White mist fills the frame, swirling rapidly as if something is about to emerge."
+                "The portal hums to life, its runes glowing brightly. White mist fills the frame, swirling rapidly, drawing you in."
             )
         )
 
@@ -265,39 +265,90 @@ class App {
         gameMap[Triple(5, 3, 3)] = portalControlRoom
         gameMap[Triple(5, 3, 5)] = portalRoom
 
+        /**
+         * Spawn all the items in their rooms. Make some activators for scenes.
+         * This is further explained in the scene class comments if necessary.
+         */
+
+        // Scene keys
+        greenKey.spawn(arrayOf(blastDoor))
+        blueKey.spawn(arrayOf(messHall, serverRoom))
+        orangeKey.spawn(arrayOf(storageRoom526, storageRoom622))
+
+        // Activators
+        jerryCan.spawn(arrayOf(labRoom))
+        // Using the jerry can in the generator room activates the generator room, control room, and some hallways
+        generatorRoom.addActivator(jerryCan, arrayOf(controlRoom) + unpoweredHallways)
+
+        finger.spawn(arrayOf(medBay))
+        controlRoom.addActivator(finger, arrayOf(portalControlRoom))
+
+        portalKey.spawn(arrayOf(portalControlRoom))
+        portalControlRoom.addActivator(portalKey, arrayOf(portalRoom))
+
+
+
+
+
         // Set the spawn location
-        var currentPosition = Triple(1,1,1)
+        currentScene = gameMap[currentCoords]!!
+        // Set the scene that must be activated for the player to win
+        winScene = portalRoom
+
     }
 
     // Move the player to the relevant adjacent scene
-    fun move(dir: Char) {
-        if (adjacentScene(dir)?.key == null) { // Is the player allowed to go that way?
-            when (dir) {
-                // Move the player. Nullable as we've surrounded it by a null check
-                'n' -> currentScene = adjacentScene('n')!!
-                'e' -> currentScene = adjacentScene('e')!!
-                's' -> currentScene = adjacentScene('s')!!
-                'w' -> currentScene = adjacentScene('w')!!
-                'v' -> currentScene = adjacentScene('v')!!
+    fun move(direction: Char) {
+        if (adjacentScene(direction) != null) {
+            currentCoords = when (direction) {
+                'n' -> Triple(currentCoords.first, currentCoords.second, currentCoords.third - 1)
+                'e' -> Triple(currentCoords.first + 1, currentCoords.second, currentCoords.third)
+                's' -> Triple(currentCoords.first, currentCoords.second, currentCoords.third + 1)
+                'w' -> Triple(currentCoords.first - 1, currentCoords.second, currentCoords.third)
+                'v' -> {
+                    when (gameMap[currentCoords]?.verticalConnection) {
+                        'u' -> Triple(currentCoords.first, currentCoords.second - 1, currentCoords.third)
+                        'd' -> Triple(currentCoords.first, currentCoords.second + 1, currentCoords.third)
+                        else -> currentCoords
+                    }
                 }
+
+                else -> currentCoords
+            }
+            currentScene = gameMap[currentCoords]!!
         }
     }
 
     // Returns the adjacent scene object in a given direction. Used by multiple other methods.
     fun adjacentScene(direction: Char): Scene? {
-        return when (direction) {
+
+        // Check whether the scene we are attempting to move to exists
+        val attempt = when (direction) {
             'n' -> gameMap[Triple(currentCoords.first, currentCoords.second, currentCoords.third - 1)]
             'e' -> gameMap[Triple(currentCoords.first + 1, currentCoords.second, currentCoords.third)]
             's' -> gameMap[Triple(currentCoords.first, currentCoords.second, currentCoords.third + 1)]
             'w' -> gameMap[Triple(currentCoords.first - 1, currentCoords.second, currentCoords.third)]
             'v' -> {
-                when (gameMap[currentCoords].verticalConnection) {
+                when (gameMap[currentCoords]?.verticalConnection) {
                     'u' -> gameMap[Triple(currentCoords.first, currentCoords.second - 1, currentCoords.third)]
                     'd' -> gameMap[Triple(currentCoords.first, currentCoords.second + 1, currentCoords.third)]
                     else -> null
                 }
             }
             else -> null
+        }
+
+        // If the scene we are attempting to move to exists, return it - otherwise null.
+        return attempt
+    }
+
+    fun unlockAdjacentRooms(key: Item) {
+        charArrayOf('n', 'e', 's', 'w').forEach { direction -> // Iterate through, attempting to unlock each adjacent room
+            if (adjacentScene(direction) != null ) {
+                if (adjacentScene(direction)!!.key == key) {
+                    adjacentScene(direction)!!.key = null
+                }
+            }
         }
     }
 
@@ -332,7 +383,7 @@ class App {
     fun useItem (itemNumber: Int) {
         val item = getInventoryItem(itemNumber)
         when (item?.type) {
-            "Key" -> currentScene.unlockAdjacentRooms(item.id) // If it's a key, try to unlock the relevant room(s)
+            "Key" -> unlockAdjacentRooms(item) // If it's a key, try to unlock the relevant room(s)
             /*
             If it's a scene activator (this is further explained in the scene class's comments), attempt to activate
             the current scene. Only remove the item if activate() returns true - meaning the activation was successful.
@@ -356,7 +407,7 @@ class App {
 
     // Returns true when the player has met the win condition.
     fun hasWon(): Boolean {
-        return (currentScene == portalRoom) && (portalRoom.activated > 0)
+        return (currentScene == winScene) && (winScene.activated > 0)
     }
 }
 
@@ -399,15 +450,6 @@ class Scene(
     When the player attempts to use a key, check all the relevant surrounding rooms to see
     if that key unlocks any of them.
      */
-    fun unlockAdjacentRooms(keyId: Int) {
-        charArrayOf('n', 'e', 's', 'w').forEach { direction -> // Iterate through, attempting to unlock each adjacent room
-            if (adjacentScene(direction) != null ) {
-                if (adjacentScene(direction)!!.locked == keyId) {
-                    adjacentScene(direction)!!.locked = 0
-                }
-            }
-        }
-    }
 
     // Adds an item object to this scene
     fun addItem(obj: Item) {
@@ -443,9 +485,9 @@ class Scene(
  * Define the class for items. Items spawn within scenes, and can be moved into the player's inventory.
  */
 
-class Item(val name: String, val spawnLocations: Array<Scene>, val type: String, val id: Int) {
+class Item(val name: String, val type: String) {
     // Pick a random scene in spawnLocations and spawn the item in that room.
-    fun spawn() {
+    fun spawn(spawnLocations: Array<Scene>,) {
         spawnLocations[spawnLocations.indices.random()].addItem(this)
     }
 }
@@ -455,29 +497,6 @@ fun main() {
     FlatDarkLaf.setup()     // Flat, dark look-and-feel
     val app = App()         // Create the app model
     MainWindow(app)         // Create and show the UI, using the app model
-
-
-
-    /**
-     * Spawn all the items in their rooms. Make some activators for scenes.
-     * This is further explained in the scene class comments if neccesary.
-     */
-
-    // Scene keys
-    facilityKey.spawn()
-    medBayKey.spawn()
-    labKey.spawn()
-
-    // Activators
-    jerryCan.spawn()
-    // Using the jerry can in the generator room activates the generator room, control room, and some hallways
-    generatorRoom.addActivator(jerryCan, arrayOf(controlRoom) + unpoweredHallways)
-
-    finger.spawn()
-    controlRoom.addActivator(finger, arrayOf(portalControlRoom))
-
-    portalKey.spawn()
-    portalControlRoom.addActivator(portalKey, arrayOf(portalRoom))
 }
 
 /**
@@ -485,7 +504,7 @@ fun main() {
  * Defines the UI and responds to events
  * The app model should be passed as an argument
  */
-class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
+class MainWindow(val app: App) : JFrame(), ActionListener {
 
     // Popups for title/instructions and winning
     private lateinit var introPopUp: IntroPopUpDialog
@@ -574,7 +593,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
      * Populate the UI with UI controls
      */
     private fun addControls() {
-        this.addKeyListener(this)
 
         // Set popups
         introPopUp = IntroPopUpDialog()
@@ -872,31 +890,31 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         Enable, grey out, or hide directional controls based on whether that adjacent scene in the respective
         direction is unlocked, locked, or doesn't exist
          */
-        if (app.currentScene.adjacentScene('n') != null) {
+        if (app.adjacentScene('n') != null) {
             northButton.text = "↑"
         } else {
             northButton.text = ""
         }
-        if (app.currentScene.adjacentScene('s') != null) {
+        if (app.adjacentScene('s') != null) {
             southButton.text = "↓"
         } else {
             southButton.text = ""
         }
-        if (app.currentScene.adjacentScene('e') != null) {
+        if (app.adjacentScene('e') != null) {
             eastButton.text = "→"
         } else {
             eastButton.text = ""
         }
-        if (app.currentScene.adjacentScene('w') != null) {
+        if (app.adjacentScene('w') != null) {
             westButton.text = "←"
         } else {
             westButton.text = ""
         }
 
-        northButton.isEnabled = app.currentScene.adjacentScene('n')?.locked == 0
-        eastButton.isEnabled = app.currentScene.adjacentScene('e')?.locked == 0
-        southButton.isEnabled = app.currentScene.adjacentScene('s')?.locked == 0
-        westButton.isEnabled = app.currentScene.adjacentScene('w')?.locked == 0
+        northButton.isEnabled = (app.adjacentScene('n') != null) && (app.adjacentScene('n')?.key == null)
+        eastButton.isEnabled = (app.adjacentScene('e') != null) && (app.adjacentScene('e')?.key == null)
+        southButton.isEnabled = (app.adjacentScene('s') != null) && (app.adjacentScene('s')?.key == null)
+        westButton.isEnabled = (app.adjacentScene('w') != null) && (app.adjacentScene('w')?.key == null)
 
         // Make the vertical movement button reflect the vertical direction that player can move in, if at all
         when (app.currentScene.verticalConnection) {
@@ -958,30 +976,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener, KeyListener {
         }
         updateView()
     }
-
-    override fun keyPressed(e: KeyEvent?) {
-//      Check which key was pressed and act upon it - unless the player has won, in which case they can't move
-        if (!app.hasWon()) {
-            when (e?.keyCode) {
-                37 -> app.move('w')
-                38 -> app.move('n')
-                39 -> app.move('e')
-                40 -> app.move('s')
-            }
-        }
-
-        // Ensure view matched the updated app model data
-        updateView()
-    }
-
-    override fun keyTyped(e: KeyEvent?) {
-        // This function only exists so Kotlin doesn't get upset
-    }
-
-    override fun keyReleased(e: KeyEvent?) {
-        // This function only exists so Kotlin doesn't get upset
-    }
-
 }
 
 /**

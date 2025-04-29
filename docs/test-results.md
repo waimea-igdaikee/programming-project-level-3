@@ -148,5 +148,9 @@ I will initialise the game multiple times and see if the blue keycard changes it
 
 ### Test Result
 
+![randomSpawns.gif](images%2FrandomSpawns.gif)
+
+The above gif shows that the spawn location of the blue keycard is randomly selected to be either the mess hall or server room, as intended.
+
 
 ---
