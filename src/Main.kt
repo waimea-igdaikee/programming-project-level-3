@@ -33,11 +33,10 @@ class App {
     // Data fields
     var currentCoords = Triple(1,1,1) // The coordinates of the scene the player should spawn in
     lateinit var currentScene: Scene
-    val inventory = mutableListOf<Item>()
-    // Game map that holds all the scenes and their positions.
-    val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>()
-    lateinit var unpoweredHallways: List<Scene>
+    val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>() // Game map that holds all the scenes and their positions.
     lateinit var winScene: Scene
+
+    val inventory = mutableListOf<Item>()
 
     init {
         setupMap()
@@ -205,8 +204,8 @@ class App {
             ), blueKey
         )
 
-
-        unpoweredHallways = listOf(
+        // A list of hallways whose lights should be activated when the generator is powered
+        val unpoweredHallways = listOf(
             hallway425,
             hallway525,
             hallway625,
@@ -297,7 +296,7 @@ class App {
 
     }
 
-    // Move the player to the relevant adjacent scene
+    // Attempts to move the player to the target adjacent scene. Takes a char input for the desired direction to move: 'n', 'e', etc.
     fun move(direction: Char) {
         if (adjacentScene(direction) != null) {
             currentCoords = when (direction) {
@@ -312,16 +311,19 @@ class App {
                         else -> currentCoords
                     }
                 }
-
                 else -> currentCoords
             }
+            // Now that we know the target scene exists, move to it.
             currentScene = gameMap[currentCoords]!!
         }
     }
 
-    // Returns the adjacent scene object in a given direction. Used by multiple other methods.
+    /*
+    Returns the adjacent scene object in a given direction.
+    Takes a char input for the desired direction to move: 'n', 'e', etc.
+    Used by multiple other methods.
+    */
     fun adjacentScene(direction: Char): Scene? {
-
         // Check whether the scene we are attempting to move to exists
         val attempt = when (direction) {
             'n' -> gameMap[Triple(currentCoords.first, currentCoords.second, currentCoords.third - 1)]
@@ -337,11 +339,11 @@ class App {
             }
             else -> null
         }
-
         // If the scene we are attempting to move to exists, return it - otherwise null.
         return attempt
     }
 
+    // Goes through all the adjacent rooms and attempts to unlock them with a given key, which the function takes as an input.
     fun unlockAdjacentRooms(key: Item) {
         charArrayOf('n', 'e', 's', 'w').forEach { direction -> // Iterate through, attempting to unlock each adjacent room
             if (adjacentScene(direction) != null ) {
@@ -352,7 +354,7 @@ class App {
         }
     }
 
-    // Return the requested item object if it exists. Used for displaying the scene's items
+    // Return the requested item object from the scene, if it exists. Used for displaying the scene's items
     fun getSceneItem(itemNumber: Int): Item? {
         return if (currentScene.items.size >= itemNumber) {
             currentScene.items[itemNumber - 1]

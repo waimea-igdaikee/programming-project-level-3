@@ -19,6 +19,7 @@ Testing the movement system of my game, to make sure players can move where they
 I will run 2 tests - test 1 will check that valid and invalid inputs are correctly handled, and test 2 will check that all scenes in the map can be reached, including the far ends of the map and any bounded scenes.
 
 ### Test 1 Result 1
+
 ![failedMovement.gif](screenshots%2FfailedMovement.gif)
 
 This first test failed before I had even got to testing invalid inputs. The issue is that the vertical movement button didn't actually move me down. I'll have to debug my program to find the source of this issue.
@@ -85,16 +86,19 @@ I will split this test into 3 separate mini-tests to make things easier to follo
 ### Test Result
 
 1. Taking items:
+
 ![taking.gif](screenshots%2Ftaking.gif)
 
 As the above gif shows, taking items works as intended (including for the boundary case), and the UI reacts to show that no more items can be picked up when the player's inventory is full.
 
 2. Using items:
+
 ![using.gif](screenshots%2Fusing.gif)
 
 Works as intended; the item gets used only when the player is in the correct scene. This also demonstrates consumable items being used; unlike keycards, the jerry can got removed from the player's inventory once it was successfully used. I have also highlighted the fact the scene's descriptions have changed to further demonstrate that the item using system works correctly - though this will be explained in further detail in the 'activation system' tests.
 
 3. Dropping items:
+
 ![dropping.gif](screenshots%2Fdropping.gif)
 
 As can be seen, the dropping of items also works as intended (again, including for the boundary case), and the UI reacts to show that no more items can be dropped when there is no more space in that scene.
