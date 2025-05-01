@@ -32,8 +32,8 @@ import javax.swing.*
 class App {
     // Data fields
     var currentCoords = Triple(1,1,1) // The coordinates of the scene the player should spawn in
-    lateinit var currentScene: Scene
     val gameMap = mutableMapOf<Triple<Int, Int, Int>, Scene>() // Game map that holds all the scenes and their positions.
+    lateinit var currentScene: Scene
     lateinit var winScene: Scene
 
     val inventory = mutableListOf<Item>()
@@ -48,7 +48,7 @@ class App {
 
     fun setupMap() {
         /**
-         * Define item objects
+         * Define items
          */
 
         // Keys
@@ -66,7 +66,7 @@ class App {
          * Define the map
          */
 
-        // Shared hallway descriptions
+        // Common descriptions that a few scenes share
         val poweredHallwayDescriptions = arrayOf(
             "Faint overhead lights flicker to life, casting long shadows down the narrow hallway."
         )
@@ -105,7 +105,7 @@ class App {
         val elevator315 = Scene(
             "Elevator", arrayOf(
                 "An untrustworthy elevator at the top, its doors twitching as if barely hanging on."
-            )
+            ), null, 'd'
         )
 
         val messHall = Scene(
@@ -129,7 +129,7 @@ class App {
         val elevator325 = Scene(
             "Elevator", arrayOf(
                 "The bottom of the shaft. Rust streaks the walls. The elevator car looks ready to drop at any moment."
-            )
+            ), null, 'u'
         )
 
         val hallway425 = Scene("Hallway", unpoweredHallwayDescriptions)
@@ -164,13 +164,13 @@ class App {
                 "An open hall where colossal diesel generators lie dormant, like beasts in slumber.",
                 "An open hall where colossal diesel generators lie dormant, like beasts in slumber.",
                 "The generators roar to life. The walls shake with their pulse as power surges outward."
-            ), null, 1
+            ), null, 'n', 1
         )
 
         val elevator724 = Scene(
             "Elevator", arrayOf(
                 "A sharp ledge overlooks an empty elevator shaft. Frayed wires sway in the void, inviting only the reckless."
-            )
+            ), null, 'd'
         )
 
         val labRoom = Scene(
@@ -182,7 +182,7 @@ class App {
         val elevator734 = Scene(
             "Elevator", arrayOf(
                 "At the shaft's bottom, dust and debris blanket the floor. The walls echo with metallic groans above."
-            )
+            ), null, 'u'
         )
 
         val hallway634 = Scene("Hallway", unpoweredHallwayDescriptions)
@@ -218,7 +218,7 @@ class App {
         )
 
         /**
-         * Add all the scenes to the game map. Lock or enable a vertical connection for some.
+         * Map all the scenes to their positions on the map
          */
 
         // Level 1 (Top level)
@@ -233,14 +233,12 @@ class App {
         gameMap[Triple(2, 1, 5)] = hallway215
         gameMap[Triple(3, 1, 2)] = medBay
         gameMap[Triple(3, 1, 5)] = elevator315
-        elevator315.enableVerticalConnection('d')
         gameMap[Triple(4, 1, 4)] = messHall
         gameMap[Triple(5, 1, 3)] = computerRoom
         gameMap[Triple(5, 1, 2)] = serverRoom
 
         // Level 2
         gameMap[Triple(3, 2, 5)] = elevator325
-        elevator325.enableVerticalConnection('u')
         gameMap[Triple(4, 2, 5)] = hallway425
         gameMap[Triple(5, 2, 5)] = hallway525
         gameMap[Triple(6, 2, 5)] = hallway625
@@ -252,12 +250,10 @@ class App {
         gameMap[Triple(4, 2, 4)] = controlRoom
         gameMap[Triple(3, 2, 3)] = generatorRoom
         gameMap[Triple(7, 2, 4)] = elevator724
-        elevator724.enableVerticalConnection('d')
         gameMap[Triple(5, 2, 3)] = labRoom
 
         // Level 3 (Bottom level)
         gameMap[Triple(7, 3, 4)] = elevator734
-        elevator734.enableVerticalConnection('u')
         gameMap[Triple(6, 3, 4)] = hallway634
         gameMap[Triple(6, 3, 3)] = hallway633
         gameMap[Triple(6, 3, 5)] = hallway635
@@ -269,14 +265,15 @@ class App {
          * This is further explained in the scene class comments if necessary.
          */
 
-        // Scene keys
+        // Spawn each key in a random scene in its respective array
         greenKey.spawn(arrayOf(blastDoor))
         blueKey.spawn(arrayOf(messHall, serverRoom))
         orangeKey.spawn(arrayOf(storageRoom526, storageRoom622))
 
-        // Activators
+        /* Spawn activators like above.
+         * Set which room the activator can activate, and which other rooms also activate as a result.
+         */
         jerryCan.spawn(arrayOf(labRoom))
-        // Using the jerry can in the generator room activates the generator room, control room, and some hallways
         generatorRoom.addActivator(jerryCan, arrayOf(controlRoom) + unpoweredHallways)
 
         finger.spawn(arrayOf(medBay))
@@ -284,19 +281,17 @@ class App {
 
         portalKey.spawn(arrayOf(portalControlRoom))
         portalControlRoom.addActivator(portalKey, arrayOf(portalRoom))
-
-
-
-
-
-        // Set the spawn location
+        
+        // Set the spawn scene
         currentScene = gameMap[currentCoords]!!
+        
         // Set the scene that must be activated for the player to win
         winScene = portalRoom
-
     }
 
-    // Attempts to move the player to the target adjacent scene. Takes a char input for the desired direction to move: 'n', 'e', etc.
+    /* Attempts to move the player to the target adjacent scene.
+     * Takes a char input for the desired direction to move: 'n', 'e', 's', 'w', and 'v' for vertical.
+     */
     fun move(direction: Char) {
         if (adjacentScene(direction) != null) {
             currentCoords = when (direction) {
@@ -313,14 +308,14 @@ class App {
                 }
                 else -> currentCoords
             }
-            // Now that we know the target scene exists, move to it.
+            // Now that we've got the target adjacent scene (if it exists), move to it.
             currentScene = gameMap[currentCoords]!!
         }
     }
 
     /*
     Returns the adjacent scene object in a given direction.
-    Takes a char input for the desired direction to move: 'n', 'e', etc.
+    Takes a char input for the desired adjacent scene to return: 'n', 'e', 's', 'w', and 'v' for vertical.
     Used by multiple other methods.
     */
     fun adjacentScene(direction: Char): Scene? {
@@ -345,7 +340,8 @@ class App {
 
     // Goes through all the adjacent rooms and attempts to unlock them with a given key, which the function takes as an input.
     fun unlockAdjacentRooms(key: Item) {
-        charArrayOf('n', 'e', 's', 'w').forEach { direction -> // Iterate through, attempting to unlock each adjacent room
+        // Iterate through the adjacent rooms, unlocking it if the key supplied to the function matches that room's key.
+        charArrayOf('n', 'e', 's', 'w').forEach { direction ->
             if (adjacentScene(direction) != null ) {
                 if (adjacentScene(direction)!!.key == key) {
                     adjacentScene(direction)!!.key = null
@@ -354,7 +350,7 @@ class App {
         }
     }
 
-    // Return the requested item object from the scene, if it exists. Used for displaying the scene's items
+    // Given a number, return the corresponding item from the current scene (if it exists). Used for displaying item names.
     fun getSceneItem(itemNumber: Int): Item? {
         return if (currentScene.items.size >= itemNumber) {
             currentScene.items[itemNumber - 1]
@@ -372,7 +368,7 @@ class App {
         }
     }
 
-    // Move the requested item from the scene to the player's inventory
+    // Pick up the requested item from the scene into the player's inventory
     fun takeItem(itemNumber: Int) {
         val item = getSceneItem(itemNumber)
         if (item != null) {
@@ -381,7 +377,7 @@ class App {
         }
     }
 
-    // Use the item. What this does depends on what type the item is.
+    // Use the item. What this does depends on the item's type.
     fun useItem (itemNumber: Int) {
         val item = getInventoryItem(itemNumber)
         when (item?.type) {
@@ -424,71 +420,64 @@ class Scene(
     val name: String,
     val descriptions: Array<String>,
     var key: Item? = null,
+    
+    // Whether this scene is connected to a scene above or below - 'u' or 'd', respectively - 'n' otherwise.
+    var verticalConnection: Char = 'n',
+    
     var activated: Int = 0
 ) {
-    var verticalConnection = 'n'
-
     var activator: Item? = null
 
-    // For activating other scenes that change their description when this scene is activated, e.g. turning on the lights when the generator is activated
+    /* Scenes that should be activated when this scene gets activated,
+     * e.g. turning on the lights in the surrounding scenes when the generator is activated.
+     */
     lateinit var scenesToActivate: Array<Scene>
-    var currentDescription = descriptions[0]
-
+    
+    var currentDescription = descriptions[activated] // The displayed direction is the one corresponding to the current activation state
     val items = mutableListOf<Item>()
 
     /**
      * Define methods
      */
 
-    // Scenes such as stairs or elevators will use this method
-    fun enableVerticalConnection(direction: Char) {
-        if (direction == 'u' || direction == 'd') {
-            verticalConnection = direction
-        }
-    }
-
-
-    /*
-    When the player attempts to use a key, check all the relevant surrounding rooms to see
-    if that key unlocks any of them.
-     */
-
-    // Adds an item object to this scene
+    // Takes an item and adds it to this scene.
     fun addItem(obj: Item) {
         items.add(obj)
     }
 
-    // As detailed in the scene class's block comment, set an item object to be this room's activator
+    // As detailed in the scene class's block comment, set an item to be this room's activator
     fun addActivator(activatorItem: Item, scenesToActivate: Array<Scene>) {
         activator = activatorItem
         this.scenesToActivate = scenesToActivate
     }
 
-    // Activates the room to progress the game e.g. putting fuel in the generators
+    /* Attempts to activate this scene with a given item (the method's input).
+     * If the correct activator has been used, this progresses the game, e.g. putting fuel in the generators
+     */
     fun activate(attemptActivator: Item): Boolean {
         /*
         Check both whether the scene is ready to be activated (e.g. a keycard can't be inserted into a computer if the
-        scene's power is off i.e. activated == 0), and whether the right item is being used. If so, increment this
-        scene's and the relevant other scenes that this room activates' activation states.
+        scene's power is off (if activated == 0)), and whether the right item is being used.
+        If so, increment this scene's and the relevant other scenes that this room activates' activation states.
          */
         if (activated == 1 && activator == attemptActivator) {
             (arrayOf(this)+scenesToActivate).forEach {sceneToActivate ->
                 sceneToActivate.activated ++
                 sceneToActivate.currentDescription = sceneToActivate.descriptions[sceneToActivate.activated]
             }
-            return true
-        } else { // If activation conditions not met
+            return true // Return true if activation successful so the App knows that this is the case
+        } else { // If activation conditions not met, i.e. wrong item used or room not ready for activation, return false
             return false
         }
     }
 }
 
 /**
- * Define the class for items. Items spawn within scenes, and can be moved into the player's inventory.
+ * Define the item class. Items spawn within scenes, and can be moved into the player's inventory.
  */
 
 class Item(val name: String, val type: String) {
-    // Pick a random scene in spawnLocations and spawn the item in that room.
+    // Pick a random scene in the supplied array, and spawn the item in that room.
     fun spawn(spawnLocations: Array<Scene>,) {
         spawnLocations[spawnLocations.indices.random()].addItem(this)
     }
@@ -629,7 +618,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
          * Set up all the labels and buttons.
          * Some are iterated over to save lines of code.
          */
-
 
         titleLabel = JLabel("Title")
         titleLabel.horizontalAlignment = SwingConstants.CENTER
@@ -830,7 +818,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
             add(button)
         }
 
-        // Add borders to groups of related element to streamline the UX
+        // Add visible borders to groups of related element to streamline the UX
         sceneBorder = JLabel()
         sceneBorder.bounds = Rectangle(10,20, 580, 220)
         sceneBorder.border = elementBorder
@@ -929,7 +917,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
                 verticalButton.isEnabled = true
             }
             else -> {
-                verticalButton.text = "-"
+                verticalButton.text = ""
                 verticalButton.isEnabled = false
             }
         }
@@ -939,13 +927,12 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
          */
         winButton.isEnabled = app.hasWon()
         winButton.isVisible = app.hasWon()
-
         arrayOf(northButton, eastButton, southButton, westButton, verticalButton).forEach { it.isVisible = !app.hasWon() }
     }
 
     /**
      * Handle any UI events (e.g. button clicks)
-     * Usually this involves updating the application model
+     * This involves updating the application model
      * then refreshing the UI view
      */
     override fun actionPerformed(e: ActionEvent?) {
@@ -954,13 +941,14 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
             helpButton -> introPopUp.isVisible = true
             winButton -> winPopUp.isVisible = true
 
-            //
+            // Tell the app to move in the desired direction
             northButton -> app.move('n')
             eastButton -> app.move('e')
             southButton -> app.move('s')
             westButton -> app.move('w')
             verticalButton -> app.move('v')
 
+            // Tell the app to do the applicable action with the item in question
             useButton1 -> app.useItem(1)
             useButton2 -> app.useItem(2)
             useButton3 -> app.useItem(3)
@@ -976,7 +964,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
             dropButton3 -> app.dropItem(3)
             dropButton4 -> app.dropItem(4)
         }
-        updateView()
+        updateView() // Update the UI to reflect the action that has been performed
     }
 }
 

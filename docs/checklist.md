@@ -86,10 +86,10 @@ The game GUI:
 
 The program code is well-commented:
 - [x] **JavaDoc Block comments** are used at the top of each **file** and **function**
-- [ ] Comments accurately describe the **function and behaviour** of the code:
-  - [ ] Defining the **purpose** of functions / key blocks of code
-  - [ ] Explaining the **reason** (the '**why**') of key parts of the code
-  - [ ] Defining function **parameters** and/or **return values**
+- [x] Comments accurately describe the **function and behaviour** of the code:
+  - [x] Defining the **purpose** of functions / key blocks of code
+  - [x] Explaining the **reason** (the '**why**') of key parts of the code
+  - [x] Defining function **parameters** and/or **return values**
 
 ### Program Testing
 
