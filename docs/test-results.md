@@ -38,7 +38,7 @@ We can see here that movement works as intended; we move where intended for vali
 
 ### Test 2 Result
 
-![movementBoundaries.gif](images/movementBoundaries.gif)
+![movementBoundaries.gif](screenshots/movementBoundaries.gif)
 
 The above gif shows that all my rooms are able to be entered, including those at the far ends of the map and those bounded by walls.
 
