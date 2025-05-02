@@ -20,25 +20,25 @@ I will run 2 tests - test 1 will check that valid and invalid inputs are correct
 
 ### Test 1 Result 1
 
-![failedMovement.gif](screenshots%2FfailedMovement.gif)
+![failedMovement.gif](screenshots/failedMovement.gif)
 
 This first test failed before I had even got to testing invalid inputs. The issue is that the vertical movement button didn't actually move me down. I'll have to debug my program to find the source of this issue.
 
 I have found what was causing this issue:
 
-![movementBug.png](screenshots%2FmovementBug.png)
+![movementBug.png](screenshots/movementBug.png)
 
 In the line: `'v' -> gameMap[Triple...`, the 'v' should be a 'd' for 'down'. I must have accidentally written 'v' when refactoring my code. Now that this bug has been addressed, I will retest my code. _Note: from here on in, mouse clicks are shown my a yellow circle around the pointer. This is useful as it's otherwise impossible to tell when I am clicking greyed-out buttons._
 
 ### Test 1 Result 2
 
-![movementWorking.gif](screenshots%2FmovementWorking.gif)
+![movementWorking.gif](screenshots/movementWorking.gif)
 
 We can see here that movement works as intended; we move where intended for valid inputs, and the game doesn't let us move into a room that is locked or doesn't exist.
 
 ### Test 2 Result
 
-![movementBoundaries.gif](images%2FmovementBoundaries.gif)
+![movementBoundaries.gif](images/movementBoundaries.gif)
 
 The above gif shows that all my rooms are able to be entered, including those at the far ends of the map and those bounded by walls.
 
@@ -58,7 +58,7 @@ In order, I will try:
 
 ### Test Result
 
-![locking.gif](screenshots%2Flocking.gif)
+![locking.gif](screenshots/locking.gif)
 
 As the above gif shows, the unlocking of scenes works as expected. Additionally, for valid inputs, the UI updates to show the scenes' newly unlocked states.
 
@@ -87,19 +87,19 @@ I will split this test into 3 separate mini-tests to make things easier to follo
 
 1. Taking items:
 
-![taking.gif](screenshots%2Ftaking.gif)
+![taking.gif](screenshots/taking.gif)
 
 As the above gif shows, taking items works as intended (including for the boundary case), and the UI reacts to show that no more items can be picked up when the player's inventory is full.
 
 2. Using items:
 
-![using.gif](screenshots%2Fusing.gif)
+![using.gif](screenshots/using.gif)
 
 Works as intended; the item gets used only when the player is in the correct scene. This also demonstrates consumable items being used; unlike keycards, the jerry can got removed from the player's inventory once it was successfully used. I have also highlighted the fact the scene's descriptions have changed to further demonstrate that the item using system works correctly - though this will be explained in further detail in the 'activation system' tests.
 
 3. Dropping items:
 
-![dropping.gif](screenshots%2Fdropping.gif)
+![dropping.gif](screenshots/dropping.gif)
 
 As can be seen, the dropping of items also works as intended (again, including for the boundary case), and the UI reacts to show that no more items can be dropped when there is no more space in that scene.
 
@@ -121,7 +121,7 @@ In order, I will try:
 
 ### Test Result
 
-![activation.gif](screenshots%2Factivation.gif)
+![activation.gif](screenshots/activation.gif)
 
 As the above gif shows, nothing happens - as intended - when an invalid input is made, and when a valid input is made, the item gets consumed and the relevant scenes are activated, and update their description to match.
 
@@ -139,7 +139,7 @@ In order, I will try:
 
 ### Test Result
 
-![winState.gif](screenshots%2FwinState.gif)
+![winState.gif](screenshots/winState.gif)
 
 The above gif shows that the win state works as intended - the button only appears once the portal has been activated. Technically, this passes the test - but whilst this _was_ the expected result, the 'enter the portal' button is in the wrong position in the GUI, and the actual pop-up message seems rather unenthusiastic. So, while I am happy that this passes the test, I am going to change the button's UI position and the popup dialog's mesasage.
 
@@ -160,9 +160,6 @@ I will initialise the game multiple times and see if the blue keycard changes it
 
 ### Test Result
 
-![randomSpawns.gif](images%2FrandomSpawns.gif)
+![randomSpawns.gif](images/randomSpawns.gif)
 
 The above gif shows that the spawn location of the blue keycard is randomly selected to be either the mess hall or server room, as intended.
-
-
----

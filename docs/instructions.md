@@ -19,7 +19,7 @@
 
 You are to create a simple, interactive computer game with a graphical user interface (GUI), where the player can move between locations in a map, exploring with a particular purpose in mind: discovering the exit, finding lost items, etc.  
 
-![map.png](images/map.png)
+![map.png](screenshots/map.png)
 
 You will be assessed on how skilfully and effectively you construct, test, debug and document the program.
 

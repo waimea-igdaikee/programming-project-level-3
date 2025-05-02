@@ -1,4 +1,4 @@
-# PROJECT NAME HERE
+# Facility Escape Game
 
 by Indiana Daikee
 
@@ -8,25 +8,21 @@ This is a programming project for **NCEA Level 3**, assessed against standard [9
 
 The project is written in the [Kotlin](https://kotlinlang.org) programming language and demonstrates a number of **complex programming techniques**:
 - Programming a graphical user interface (GUI)
-- Reading from, or writing to, files
 - Object-oriented programming (OOP) classes and objects
 - Self-defined types
 - Using non-core API, library or framework
-- Using complex data structures (e.g. stacks, queues, trees)
-
-** EDIT LIST ABOVE TO MATCH YOUR PROJECT**
-
 ---
 
 ## Project Files
 
+- The executable .jar file can be found in the [project_jar](out%2Fartifacts%2Fproject_jar) folder
 - Program source code can be found in the [src](src/) folder
 - Program test plan is in [test-plan.md](docs/test-plan.md) in the docs folder
 - Program test evidence is in [test-results.md](docs/test-results.md) in the docs folder
+- Some evidence of development from the start of the project is in [development.md](docs%2Fdevelopment.md)
 
 ---
 
 ## Project Description
 
-**PLACE YOUR PROJECT DESCRIPTION HERE**
-
+This project is a video game in which the player must explore an underground facility, find the secrets hidden inside, and in turn, escape. The challenge is that no map or visualisation of progress is given - it's up to the player to find their own way around, and figure out what items to use where.

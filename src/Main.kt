@@ -72,7 +72,7 @@ class App {
         )
         val unpoweredHallwayDescriptions = arrayOf(
             "The hallway is pitch black, its end swallowed by shadow.",
-            "Lights hum to life overhead, revealing smeared handprints on the walls."
+            "Lights hum to life overhead, revealing bloody marks on the walls."
         )
 
         val entrance = Scene(
@@ -153,16 +153,16 @@ class App {
 
         val controlRoom = Scene(
             "Control Room", arrayOf(
-                "A dark room. A massive, ancient computer rests silently in the middle — if only there were a way to bring it back to life...",
-                "The room is bathed in cold light. The massive computer blinks expectantly, awaiting a fingerprint scan...",
-                "The fingerprint is accepted. The computer thrums, and deep below, something mechanical shifts awake..."
+                "A dark room. A massive, ancient computer rests silently in the middle — if only there were a way to <i>turn the power on and it back to life...</i>",
+                "The room is bathed in cold light. The massive computer blinks expectantly, <i>awaiting someone's fingerprint scan...</i>",
+                "The fingerprint is accepted. The computer thrums, and <i>deep below, something mechanical shifts awake...</i>"
             )
         )
 
         val generatorRoom = Scene(
             "Generator Room", arrayOf(
-                "An open hall where colossal diesel generators lie dormant, like beasts in slumber.",
-                "An open hall where colossal diesel generators lie dormant, like beasts in slumber.",
+                "An open hall where colossal diesel generators lie dormant, <i>thirsty for diesel...</i>",
+                "An open hall where colossal diesel generators lie dormant, <i>thirsty for diesel...</i>",
                 "The generators roar to life. The walls shake with their pulse as power surges outward."
             ), null, 'n', 1
         )
@@ -175,7 +175,7 @@ class App {
 
         val labRoom = Scene(
             "Lab Room", arrayOf(
-                "Chemical stains and shattered glass litter this abandoned lab. Jerry cans filled with fuel sit in the corner, waiting."
+                "Chemical stains and shattered glass litter this abandoned lab. <i>Jerry cans filled with fuel sit in the corner, waiting to be used.</i>"
             ), orangeKey
         )
 
@@ -198,9 +198,9 @@ class App {
 
         val portalControlRoom = Scene(
             "Portal Controls", arrayOf(
-                "An array of levers and buttons stretches across the wall. A dusty screen reads: 'Disabled at master control room'...",
-                "The array lights up. A message glows on the screen: 'Insert lockout key to continue'...",
-                "The controls hum with power. The screen now displays: 'Portal Online'. The levers click into place, and the air grows tense with anticipation."
+                "An array of levers and buttons stretches across the wall. A dusty screen reads: <i>'Disabled at master control room'...</i>",
+                "The array lights up. A message glows on the screen: <i>'Insert lockout key to continue'...</i>",
+                "The controls hum with power. The screen now displays: <i>'Portal Online'</i>. The levers click into place, and the air grows tense with anticipation."
             ), blueKey
         )
 
@@ -483,7 +483,6 @@ class Item(val name: String, val type: String) {
     }
 }
 
-
 fun main() {
     FlatDarkLaf.setup()     // Flat, dark look-and-feel
     val app = App()         // Create the app model
@@ -652,7 +651,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
         winButton.isEnabled = false
         winButton.isVisible = false
         add(winButton)
-
 
 
         // Movement buttons
@@ -987,7 +985,7 @@ class IntroPopUpDialog(): JDialog() {
      */
     private fun configureWindow() {
         title = "Instructions"
-        contentPane.preferredSize = Dimension(500, 300)
+        contentPane.preferredSize = Dimension(500, 340)
         isResizable = false
         isModal = true
         layout = null
@@ -1001,8 +999,8 @@ class IntroPopUpDialog(): JDialog() {
         val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
 
         // Adding <html> to the label text allows it to wrap
-        val message = JLabel("<html>You find yourself at the entrance of a forgotten facility, long sealed and untouched. Whispers of strange energy drift through its empty halls. Something waits at the heart of it—but what, or why, remains unknown.<br><br>Use the arrow keys or on-screen buttons to move. Click 'Take' to collect items, 'Use' to interact, and 'Drop' to make space. You can only carry four items at once, so plan carefully.<br><br>  Search, decide, and delve deeper. Your task is to discover the truth buried within.</html>")
-        message.bounds = Rectangle(25, 25, 450, 270)
+        val message = JLabel("<html>You find yourself at the entrance of a forgotten facility, long sealed and untouched. Whispers of strange energy drift through its empty halls. Something waits at the heart of it—but what, or why, remains unknown.<br><br>Use the on-screen arrow buttons to move. Click 'Take' to pick up items, 'Use' to interact, and 'Drop' to make space. You can only carry four items at once, so plan carefully.<br><br>Locked rooms are shown by the respective movement keys being greyed out - and if there's no arrow there, there's a wall in that direction. Search, decide, and delve deeper - some rooms have clues given in <i>italics</i> - these will guide you in your task of discovering the truth buried within...</html>")
+        message.bounds = Rectangle(25, 25, 450, 400)
         message.verticalAlignment = SwingConstants.TOP
         message.font = baseFont
         add(message)
@@ -1025,7 +1023,7 @@ class WinPopUpDialog(): JDialog() {
      */
     private fun configureWindow() {
         title = "Win"
-        contentPane.preferredSize = Dimension(400, 200)
+        contentPane.preferredSize = Dimension(400, 380)
         isResizable = false
         isModal = true
         layout = null
@@ -1039,8 +1037,8 @@ class WinPopUpDialog(): JDialog() {
         val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 16)
 
         // Adding <html> to the label text allows it to wrap
-        val message = JLabel("<html>You go through the portal and emerge on the other side. You win!</html>")
-        message.bounds = Rectangle(25, 25, 350, 150)
+        val message = JLabel("<html>You step into the portal, its swirling surface casting eerie reflections across the rusted walls of the forgotten underground facility. The air hums with quiet power, and for a moment, time seems to hold its breath. A faint vibration passes through your feet as the world around you bends, stretches, and slips away. There's no fanfare, no alarms—just the calm, electric stillness of crossing into something beyond.\n Then, light. You emerge on the other side, the air clearer, the weight of the old world gone. Behind you lies the silence of metal and dust; ahead, a place untouched, filled with potential. You glance back once, then forward. Whatever this place is, it’s yours now. You’ve crossed the threshold. You win.</html>")
+        message.bounds = Rectangle(25, 25, 350, 380)
         message.verticalAlignment = SwingConstants.TOP
         message.font = baseFont
         add(message)

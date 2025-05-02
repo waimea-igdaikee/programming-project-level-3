@@ -30,11 +30,11 @@ You will need to come up with a location map for your game. The map should consi
 
 The map could be based on a **grid**:
 
-![map-grid.png](images/map-grid.png)
+![map-grid.png](screenshots/map-grid.png)
 
 Or it could be more **organic**:
 
-![map-organic.png](images/map-organic.png)
+![map-organic.png](screenshots/map-organic.png)
 
 ### Map Locations
 
@@ -48,7 +48,7 @@ Each location should have a **unique identifier**, along with other data that de
 
 Each location should be connected to one or more other locations via exits / directions to form the map.
 
-![compass.png](images/compass.png)
+![compass.png](screenshots/compass.png)
 
 The number of possible connections depends upon the complexity of your map, but could include:
 
