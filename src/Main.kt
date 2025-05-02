@@ -2,12 +2,9 @@
  * =====================================================================
  * Programming Project for NCEA Level 3, Standard 91906
  * ---------------------------------------------------------------------
- * Project Name:   PROJECT NAME HERE
+ * Project Name:   Facility Escape Game
  * Project Author: Indiana Daikee
  * GitHub Repo:    https://github.com/waimea-igdaikee/programming-project-level-3
- * ---------------------------------------------------------------------
- * Notes:
- * PROJECT NOTES HERE
  * =====================================================================
  */
 
